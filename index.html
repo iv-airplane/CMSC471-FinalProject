@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Project: City Motion</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <h1>City in Motion: Visualizing Taxi Pickups and Urban Flow in New York City</h1>
+
+    <h2>Proposal</h2>
+
+    <p>
+        This project explores how transportation activity changes throughout the day in New York City. 
+        We plan to build an interactive, animated map that shows taxi and ride-sharing pickup density over a 24 hour period, 
+        allowing users to move through the day and directly compare patterns between weekdays and weekends (either through a continuous 48-hour view or toggle).
+        In addition, users will be able to jump to key moments in the day, such as lunch or evening rush hour, to see how the activity shifts at different points. The goal of this main visualization is to give a clear sense of how the city “moves”
+         throughout the day in a way that isn't obvious from raw data.</p>
+    <p>
+        To support this map, we'll include a couple of supporting charts to show broader trends. A layered bar chart will show the shares of trips taken by different vehicle types (yellow taxis, green taxis, and for-hire vehicles like Uber/Lyft), 
+        allowing users to compare how the market share has changed over time, notably since Uber's founding in 2009. We will also create a heatmap with hour of the day on the x-axis and day of the week on the y-axis, where color represents trip volume. 
+        This will help us highlight recurring patterns such as weekday commuting behavior versus weekend nightlife activity. 
+    </p>
+
+    <h2>Ryley's Visualization: Color pleth map</h2>
+    <!-- Ryley's Visualization -->
+    <div id="vis2"></div> 
+
+    <h2>Ivan's visualization: Market share throught the years</h2>
+    <!-- Ivan's visualization -->
+    <div id="vis3"></div> 
+
+    <h2>Dwarakesh's Visualization: Heat map</h2>
+    <!-- Dwarakesh's Visualization -->
+    <div id="vis4"></div> 
+
+    <h2>Dataset</h2>
+
+    <p>
+        We will use trip data from the NYC Taxi and Limousine Commission (TLC Trip Record Data). This dataset includes detailed information on taxi and for-hire vehicle trips in New York City, such as pickup time, location, and type of vehicle. 
+        The dataset is large and fairly complex, with millions of trips recorded each month over multiple years. Since each trip has many details, we need to aggregate the data to make it readable and meaningful. It also becomes more complex when comparing different vehicle types and looking at changes over time, especially before and after the congestion pricing policy. These factors make this dataset a good fit for an interactive visualization that can help reveal patterns that wouldn’t be obvious in raw data.
+
+    </p>
+        
+    <!-- Load all the necessary libraries and our script -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/script.js"></script>
+    
+</body>
+</html>
