@@ -62,40 +62,87 @@ function createVis2(data) {
 function createVis3(data) {
     const marketShareChartSpec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
-        "width": 700,
-        "height": 400,
         "data": {"values": allData},
-        "mark": {
-            "type": "bar",
-            "size": 15
-        },
-        "encoding": {
-            "x": {
-                "field": "year", 
-                "type": "ordinal",
-                "scale": {
-                    "paddingInner": 0.1,
-                    "paddingOuter": 0.05
-                }
+        // Concatenate two charts together
+        "vconcat": [
+            {
+                "width": 200,
+                "height": 300,
+                "transform": [{ "filter": "datum.year === 2020" }],
+                // overlay text over the middle of the donut hole
+                "layer": [
+                    {
+                        "mark": {
+                            "type": "arc",
+                            "innerRadius": 60
+                        },
+                        "encoding": {
+                            "theta": { 
+                            "field": "share",
+                            "type": "quantitative" 
+                            },
+                            "color": {
+                                "field": "taxi_type",
+                                "type": "nominal",
+                                "scale": {
+                                    // map taxi types to appropriate colors
+                                    "domain": ["yellow", "green", "hvfhv", "other_fhv"],
+                                    "range": ["#f0a500", "#4caf7d", "#3d5a99", "#aaaaaa"]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "mark": {
+                            "type": "text",
+                            "fontSize": 20,
+                            "fontWeight": "bold",
+                            "align": "center",
+                            "baseline": "middle"
+                        },
+                        "encoding": {
+                            "text": { "value": "2020" }
+                        }
+                    }
+                ]
             },
-            "y": {
-               "aggregate": "sum",
-               "field": "trip_count",
-               "type": "quantitative",
-               "stack": "normalize",
-               "axis": null // disable y-axis completely, it's not visible
-            },
-            "color": {
-                "field": "taxi_type",
-                "type": "nominal",
-                "scale": {
-                    // map taxi types to appropriate colors
-                    "domain": ["yellow", "green", "hvfhv", "other_fhv"],
-                    "range": ["#f0a500", "#4caf7d", "#3d5a99", "#aaaaaa"]
-                }
-            },
-        },
-        "title": "Taxi Market Share Throughout The Years"
+            {
+                "width": 600,
+                "height": 300,
+                "mark": {
+                    "type": "bar",
+                    "size": 15
+                },
+                "encoding": {
+                    "x": {
+                        "field": "year", 
+                        "type": "ordinal",
+                        "scale": {
+                            "paddingInner": 0.1,
+                            "paddingOuter": 0.05
+                        }
+                    },
+                    "y": {
+                    "aggregate": "sum",
+                    "field": "trip_count",
+                    "type": "quantitative",
+                    "stack": "normalize",
+                    "axis": null // disable y-axis completely, it's not visible
+                    },
+                    "color": {
+                        "field": "taxi_type",
+                        "type": "nominal",
+                        "scale": {
+                            // map taxi types to appropriate colors
+                            "domain": ["yellow", "green", "hvfhv", "other_fhv"],
+                            "range": ["#f0a500", "#4caf7d", "#3d5a99", "#aaaaaa"]
+                        }
+                    },
+                },
+                "title": "Taxi Market Share Throughout The Years"
+                        
+            }
+        ]
     }
     
 
