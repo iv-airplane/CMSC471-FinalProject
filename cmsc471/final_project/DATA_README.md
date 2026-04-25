@@ -27,7 +27,6 @@ The goal is to ensure visualization teammates can replace mock data with real da
 
 ```text
 /data
-  /preprocess_tlc.py
   /raw
     /yellow        # Yellow taxi parquet files
     /green         # Green taxi parquet files
@@ -39,6 +38,8 @@ The goal is to ensure visualization teammates can replace mock data with real da
     zone_hourly.csv
     yearly_market_share.csv
 
+/scripts
+  preprocess_tlc.py
 ```
 
 ---
@@ -285,12 +286,44 @@ This methodology produces a more realistic long-term market share trend and bett
 
 ---
 
+## GitHub Repository Note
+
+Large raw TLC trip files are intentionally not included in the GitHub repository.
+
+This includes:
+
+* `data/raw/`
+* all `.parquet` files
+* large temporary processing files
+
+These files are excluded using `.gitignore` because:
+
+* TLC parquet files are extremely large and exceed practical GitHub limits
+* raw data can be re-downloaded directly from the official TLC source
+* the repository should focus on reproducible code, documentation, and final output schemas rather than storing raw source files
+
+The GitHub repository should include:
+
+* preprocessing scripts (`scripts/`)
+* README documentation
+* schema definitions
+* lightweight processed outputs if needed
+* visualization-facing CSV outputs
+
+but should not include raw monthly parquet downloads.
+
+This keeps the repository lightweight, reproducible, and easier for collaborators to manage.
+
+If any preprocessing needs to be rerun or updated, Emily will handle the pipeline locally using the raw parquet files, regenerate the required processed datasets, and then push the updated output CSV files and code changes to the shared GitHub repository.
+
+---
+
 ## Running the Pipeline
 
 From the project root:
 
 ```bash
-python data/preprocess_tlc.py
+python scripts/preprocess_tlc.py
 ```
 
 This will:
@@ -329,4 +362,12 @@ Responsible for:
 * helping debug and improve the more complex HVFHV vs FHV market share classification
 * leading preprocessing and data preparation for Visualization 3 (Dwarakesh)
 
+### Visualization Students
+
+Responsible for:
+
+* building visualizations against mock files
+* verifying compatibility with final outputs
+
+The final real dataset must match the agreed schema exactly so the visualization works without code changes.
 
