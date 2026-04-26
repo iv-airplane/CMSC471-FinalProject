@@ -50,6 +50,15 @@ All trip data comes from NYC TLC Trip Record Data:
 
 [https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
 
+## Map Geometry Sources (GeoJSON)
+
+### NYC Borough Boundaries (used by `vis2`)
+
+- **Local file**: `data/choropleth/nyc_boroughs.geojson`
+- **Downloaded from**: `dwillis/nyc-maps` on GitHub (file `boroughs.geojson`)
+- **Direct source URL**: `https://raw.githubusercontent.com/dwillis/nyc-maps/master/boroughs.geojson`
+- **Notes**: Contains 5 borough polygons with properties including `BoroName` (e.g. `Manhattan`, `Queens`).
+
 ### Yellow Taxi
 
 * Monthly parquet files
