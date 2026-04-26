@@ -1,6 +1,3 @@
 # Raw TLC data (too large for GitHub)
 data/raw/
 *.parquet
-
-# viz4: developed on feature/viz4; keep local copy ignored on main
-viz4/
