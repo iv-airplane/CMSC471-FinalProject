@@ -1,0 +1,33 @@
+zone_id,borough,pickup_date,pickup_hour,vehicle_type,trip_count,trip_price
+1,Manhattan,2024-10-16,0,yellow,220,18.2
+1,Manhattan,2024-10-16,8,yellow,1450,16.1
+1,Manhattan,2024-10-16,17,yellow,1320,17.4
+2,Manhattan,2024-10-16,0,yellow,180,17.0
+2,Manhattan,2024-10-16,8,yellow,980,15.6
+2,Manhattan,2024-10-16,17,yellow,1105,16.9
+3,Brooklyn,2024-10-16,0,yellow,95,19.3
+3,Brooklyn,2024-10-16,8,yellow,410,21.0
+3,Brooklyn,2024-10-16,17,yellow,615,20.4
+4,Queens,2024-10-16,0,yellow,70,23.5
+4,Queens,2024-10-16,8,yellow,360,24.1
+4,Queens,2024-10-16,17,yellow,525,23.2
+5,Bronx,2024-10-16,0,yellow,40,22.0
+5,Bronx,2024-10-16,8,yellow,155,23.4
+5,Bronx,2024-10-16,17,yellow,240,22.7
+6,Staten Island,2024-10-16,0,yellow,12,28.8
+6,Staten Island,2024-10-16,8,yellow,55,29.1
+6,Staten Island,2024-10-16,17,yellow,74,28.5
+
+1,Manhattan,2024-10-16,8,green,210,15.0
+2,Manhattan,2024-10-16,8,green,120,14.8
+3,Brooklyn,2024-10-16,8,green,95,17.2
+4,Queens,2024-10-16,8,green,410,18.9
+5,Bronx,2024-10-16,8,green,230,16.5
+6,Staten Island,2024-10-16,8,green,25,22.1
+
+1,Manhattan,2024-10-16,8,hvfhv,2100,19.4
+2,Manhattan,2024-10-16,8,hvfhv,1550,18.8
+3,Brooklyn,2024-10-16,8,hvfhv,980,20.2
+4,Queens,2024-10-16,8,hvfhv,760,21.1
+5,Bronx,2024-10-16,8,hvfhv,510,19.9
+6,Staten Island,2024-10-16,8,hvfhv,160,25.0

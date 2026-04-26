@@ -18,6 +18,33 @@
     border: 1px solid #ccc; /*otherwise you can't see this part*/
 }
 
+#vis2 .vis2-controls {
+    border: 1px solid #d6d6d6;
+    background: #fafafa;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: -12px 0 24px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+#vis2 .vis2-controls__row {
+    font-size: 12px;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+#vis2 .vis2-time-slider {
+    width: 100%;
+}
+
+#vis2 .vis2-time-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #333;
+    margin-top: 4px;
+}
+
 #vis3 svg {
     margin: 2rem 0;
     border: 1px solid #ccc; /*otherwise you can't see this part*/
