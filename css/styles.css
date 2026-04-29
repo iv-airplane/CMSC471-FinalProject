@@ -51,9 +51,111 @@
 }
 
 
-#vis4 svg {
-    margin: 2rem 0;
-    border: 1px solid #ccc; /*otherwise you can't see this part*/
+/* Vis4 heatmap (scoped; chart wider than 800px body column) */
+#vis4 {
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#vis4 .vis4-app {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #e8e8ea;
+    color: #333;
+    padding: 16px 12px 24px;
+    border-radius: 12px;
+    margin: 1rem 0;
+}
+
+#vis4 .vis4-app * {
+    max-width: none;
+}
+
+#vis4 #vis4-title {
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin: 0 0 8px;
+    color: #2a2a2a;
+}
+
+#vis4 .vis4-sub {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 16px;
+}
+
+#vis4 .vis4-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px 20px;
+    margin-bottom: 16px;
+}
+
+#vis4 .vis4-controls label {
+    font-size: 0.9rem;
+    color: #444;
+}
+
+#vis4 #vis4-taxi-type {
+    font-size: 0.95rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #bbb;
+    background: #fff;
+    min-width: 200px;
+}
+
+#vis4 #vis4-chart-wrap {
+    background: #f0f0f2;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+#vis4 #vis4-chart-wrap svg {
+    display: block;
+    margin: 0 auto;
+    border: none;
+}
+
+#vis4 .axis text {
+    fill: #444;
+    font-size: 11px;
+}
+
+#vis4 .axis path,
+#vis4 .axis line {
+    stroke: #aaa;
+}
+
+#vis4 .cell {
+    stroke: #f5f5f6;
+    stroke-width: 0.5;
+    cursor: crosshair;
+}
+
+#vis4-tooltip {
+    position: fixed;
+    pointer-events: none;
+    z-index: 20;
+    background: rgba(30, 30, 32, 0.94);
+    color: #fafafa;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.45;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transition: opacity 0.12s ease;
+    max-width: 280px;
+}
+
+#vis4-tooltip strong {
+    color: #fff;
 }
 
 .x-axis path,
