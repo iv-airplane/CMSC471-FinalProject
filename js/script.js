@@ -197,274 +197,264 @@ function createVis(zoneHourly, boroughsGeojson) {
   Ordinal: Categories with meaningful order
 */
 function createVis3(data) {
-    const colorScale = {
-        domain: ["yellow", "green", "hvfhv", "other_fhv"],
-        range: ["#f0a500", "#4caf7d", "#3d5a99", "#aaaaaa"]
-    };
-
     const marketShareChartSpec = {
         $schema: "https://vega.github.io/schema/vega-lite/v6.json",
-
         data: {
             values: data
         },
-
         vconcat: [
-            createTopRow(2020),
+            createTopRow(),
             createStackedBarChart()
         ]
     };
-
 
     // Embed the chart in the HTML file
     vegaEmbed('#vis3', marketShareChartSpec);
 }
 
-function createDonutChart(year) {
-  const colorScale = {
-        domain: ["yellow", "green", "hvfhv", "other_fhv"],
-        range: ["#f0a500", "#4caf7d", "#3d5a99", "#aaaaaa"]
+
+function createDonutChart() {
+    return {
+        width: 200,
+        height: 200,
+        layer: [
+            // Donut arcs
+            {
+                mark: {
+                    type: "arc",
+                    innerRadius: 60,
+                    outerRadius: 90
+                },
+                encoding: {
+                    theta: {
+                        field: "share",
+                        type: "quantitative"
+                    },
+                    color: {
+                        field: "taxi_type",
+                        type: "nominal",
+                        scale: colorScale,
+                        legend: null // IMPORTANT: we use custom legend
+                    }
+                }
+            },
+            // 🔤 Center label (year)
+            {
+                mark: {
+                    type: "text",
+                    fontSize: 20,
+                    fontWeight: "bold",
+                    align: "center",
+                    baseline: "middle"
+                },
+                encoding: {
+                    text: {
+                        aggregate: "max",
+                        field: "year"
+                    }
+                }
+            },
+            // "share" label above year 
+            {
+                mark: {
+                    type: "text",
+                    fontSize: 12,
+                    dy: -20,
+                    align: "center",
+                    baseline: "middle",
+                    color: "#666"
+                },
+                encoding: {
+                    text: { value: "share" }
+                }
+            }
+        ]
     };
-
-  return {
-    width: 200,
-    height: 200,
-
-    transform: [
-      { filter: `datum.year === ${year}` }
-    ],
-
-    layer: [
-      // Donut arcs
-      {
-        mark: {
-          type: "arc",
-          innerRadius: 60,
-          outerRadius: 90
-        },
-        encoding: {
-          theta: {
-            field: "share",
-            type: "quantitative"
-          },
-          color: {
-            field: "taxi_type",
-            type: "nominal",
-            scale: colorScale,
-            legend: null // IMPORTANT: we use custom legend
-          }
-        }
-      },
-
-      // 🔤 Center label (year)
-      {
-        mark: {
-          type: "text",
-          fontSize: 20,
-          fontWeight: "bold",
-          align: "center",
-          baseline: "middle"
-        },
-        encoding: {
-          text: { value: String(year) }
-        }
-      },
-
-      // 🔤 Optional: "share" label above year (matches your reference UI)
-      {
-        mark: {
-          type: "text",
-          fontSize: 12,
-          dy: -20,
-          align: "center",
-          baseline: "middle",
-          color: "#666"
-        },
-        encoding: {
-          text: { value: "share" }
-        }
-      }
-    ]
-  };
 }
 
 // A helper function to create custom legend for the plot
-function createLegendChart(year) {
-  return {
-    width: 400,
-    height: 200,
-
-    transform: [
-      { filter: `datum.year === ${year}` }
-    ],
-
-    encoding: {
-      y: {
-        field: "taxi_type",
-        type: "nominal",
-        sort: null,
-        axis: null
-      }
-    },
-
-    layer: [
-      // Color squares
-      {
-        mark: {
-          type: "point",
-          shape: "square",
-          size: 200
-        },
+function createLegendChart() {
+    return {
+        width: 400,
+        height: 200,
         encoding: {
-          color: {
-            field: "taxi_type",
-            type: "nominal",
-            scale: colorScale,
-            legend: null
-          },
-          x: { value: 10 }
-        }
-      },
-
-      // Labels (Uber, Yellow cab...)
-      {
-        mark: {
-          type: "text",
-          align: "left",
-          dx: 20
+            y: {
+                field: "taxi_type",
+                type: "nominal",
+                sort: null,
+                axis: null
+            }
         },
-        encoding: {
-          text: {
-            field: "taxi_type",
-            type: "nominal"
-          },
-          x: { value: 30 }
-        }
-      },
-
-      // Percentages (RIGHT aligned)
-      {
-        mark: {
-          type: "text",
-          align: "right"
-        },
-        encoding: {
-          text: {
-            field: "share",
-            type: "quantitative",
-            format: ".0%"
-          },
-          x: { value: 350 } // push to right
-        }
-      }
-    ]
-  };
+        layer: [
+            // Color squares
+            {
+                mark: {
+                    type: "point",
+                    shape: "square",
+                    size: 200
+                },
+                encoding: {
+                    color: {
+                        field: "taxi_type",
+                        type: "nominal",
+                        scale: colorScale,
+                        legend: null
+                    },
+                    x: { value: 10 }
+                }
+            },
+            // Labels (Uber, Yellow cab...)
+            {
+                mark: {
+                    type: "text",
+                    align: "left",
+                    dx: 20
+                },
+                encoding: {
+                    text: {
+                        field: "taxi_type",
+                        type: "nominal"
+                    },
+                    x: { value: 30 }
+                }
+            },
+            // Percentages share of taxi companies (RIGHT aligned)
+            {
+                mark: {
+                    type: "text",
+                    align: "right"
+                },
+                encoding: {
+                    text: {
+                        field: "share",
+                        type: "quantitative",
+                        format: ".0%"
+                    },
+                    x: { value: 350 } // push to right
+                }
+            }
+        ]
+    };
 }
 
-function createTopRow(year) {
-  return {
-    hconcat: [
-      createDonutChart(year),
-      createLegendChart(year)
-    ],
-    spacing: 40
-  };
+function createTopRow() {
+    return {
+        // This transform filters the data feeding into the top row 
+        // based on the current selection from the bar chart
+        transform: [
+            { filter: { param: "yearSelection" } }
+        ],
+        hconcat: [
+            createDonutChart(),
+            createLegendChart()
+        ],
+        spacing: 40
+    };
 }
 
 function createStackedBarChart() {
-  return {
-    width: 700,
-    height: 300,
-
-    title: "Taxi Market Share Throughout The Years",
-
-    layer: [
-      // Main stacked bars
-      {
-        mark: {
-          type: "bar",
-          size: 18
-        },
-
-        encoding: {
-          x: {
-            field: "year",
-            type: "ordinal",
-            axis: {
-              title: "Year",
-              labelAngle: 0
-            },
-            scale: {
-              paddingInner: 0.15,
-              paddingOuter: 0.05
-            }
-          },
-
-          y: {
-            aggregate: "sum",
-            field: "trip_count",
-            type: "quantitative",
-            stack: "normalize",
-            axis: null
-          },
-
-          color: {
-            field: "taxi_type",
-            type: "nominal",
-            scale: colorScale,
-            legend: null
-          },
-
-          tooltip: [
-            { field: "year", type: "ordinal" },
-            { field: "taxi_type", type: "nominal" },
+    return {
+        width: 700,
+        height: 300,
+        title: "Taxi Market Share Throughout The Years",
+        layer: [
+            // Main stacked bars
             {
-              aggregate: "sum",
-              field: "trip_count",
-              type: "quantitative",
-              title: "Trips",
-              // Add commas to separate thousands
-              format: ","
+                mark: {
+                    type: "bar",
+                    size: 18
+                },
+                
+                /* Parameters should live ONLY in the 
+                   chart of intereset not at the top level
+                   to avoid errors
+                */
+                params: [
+                    {
+                        name: "yearSelection",
+                        select: {
+                            type: "point",
+                            fields: ["year"],
+                            on: "click",
+                            clear: "dblclick"
+                        },
+                        value: { year: 2020 }
+                    }
+                ],
+                encoding: {
+                    x: {
+                        field: "year",
+                        type: "ordinal",
+                        axis: {
+                            title: "Year",
+                            labelAngle: 0
+                        },
+                        scale: {
+                            paddingInner: 0.15,
+                            paddingOuter: 0.05
+                        }
+                    },
+                    y: {
+                        aggregate: "sum",
+                        field: "trip_count",
+                        type: "quantitative",
+                        stack: "normalize",
+                        axis: null
+                    },
+                    color: {
+                        field: "taxi_type",
+                        type: "nominal",
+                        scale: colorScale,
+                        legend: null
+                    },
+                    // Highlight the selected bar
+                    opacity: {
+                        condition: { param: "yearSelection", empty: false, value: 1 },
+                        value: 0.4
+                    },
+                    tooltip: [
+                        { field: "year", type: "ordinal" },
+                        { field: "taxi_type", type: "nominal" },
+                        {
+                            aggregate: "sum",
+                            field: "trip_count",
+                            type: "quantitative",
+                            title: "Trips",
+                            format: "," // Adds commas to separate thousands
+                        }
+                    ]
+                }
+            },
+            // Labels years with events of interest 
+            {
+                data: {
+                    values: [
+                        { year: 2015, label: "Uber enters" },
+                        { year: 2018, label: "Ride-hailing cap" },
+                        { year: 2020, label: "COVID" },
+                        { year: 2023, label: "Congestion pricing" }
+                    ]
+                },
+                mark: {
+                    type: "text",
+                    dy: -8,
+                    fontSize: 11
+                },
+                encoding: {
+                    x: {
+                        field: "year",
+                        type: "ordinal"
+                    },
+                    y: {
+                        value: 0
+                    },
+                    text: {
+                        field: "label"
+                    }
+                }
             }
-          ]
-        }
-      },
-
-      // Labels years with events of interest 
-      {
-        data: {
-          values: [
-            { year: 2015, label: "Uber enters" },
-            { year: 2018, label: "Ride-hailing cap" },
-            { year: 2020, label: "COVID" },
-            { year: 2023, label: "Congestion pricing" }
-          ]
-        },
-
-        mark: {
-          type: "text",
-          dy: -8,
-          fontSize: 11,
-
-        },
-
-        encoding: {
-          x: {
-            field: "year",
-            type: "ordinal"
-          },
-
-          y: {
-            value: 0
-          },
-
-          text: {
-            field: "label"
-          }
-        }
-      }
-    ]
-  };
+        ]
+    };
 }
 
 // Load data
