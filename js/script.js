@@ -378,77 +378,97 @@ function createStackedBarChart() {
 
     title: "Taxi Market Share Throughout The Years",
 
-    mark: {
-      type: "bar",
-      size: 18
-    },
-
-    encoding: {
-      // X-axis
-      x: {
-        field: "year",
-        type: "ordinal",
-        axis: {
-          title: "year",
-          labelAngle: 0
+    layer: [
+      // Main stacked bars
+      {
+        mark: {
+          type: "bar",
+          size: 18
         },
-        scale: {
-          paddingInner: 0.15,
-          paddingOuter: 0.05
+
+        encoding: {
+          x: {
+            field: "year",
+            type: "ordinal",
+            axis: {
+              title: "Year",
+              labelAngle: 0
+            },
+            scale: {
+              paddingInner: 0.15,
+              paddingOuter: 0.05
+            }
+          },
+
+          y: {
+            aggregate: "sum",
+            field: "trip_count",
+            type: "quantitative",
+            stack: "normalize",
+            axis: null
+          },
+
+          color: {
+            field: "taxi_type",
+            type: "nominal",
+            scale: colorScale,
+            legend: null
+          },
+
+          tooltip: [
+            { field: "year", type: "ordinal" },
+            { field: "taxi_type", type: "nominal" },
+            {
+              aggregate: "sum",
+              field: "trip_count",
+              type: "quantitative",
+              title: "Trips",
+              // Add commas to separate thousands
+              format: ","
+            }
+          ]
         }
       },
 
-      // Y-axis: don't show it, don't need it
-      y: {
-        aggregate: "sum",
-        field: "trip_count",
-        type: "quantitative",
-        stack: "normalize",
-        axis: null
-      },
+      // Labels years with events of interest 
+      {
+        data: {
+          values: [
+            { year: 2015, label: "Uber enters" },
+            { year: 2018, label: "Ride-hailing cap" },
+            { year: 2020, label: "COVID" },
+            { year: 2023, label: "Congestion pricing" }
+          ]
+        },
 
-      // Color
-      color: {
-        field: "taxi_type",
-        type: "nominal",
-        scale: colorScale,
-        legend: null
-      },
+        mark: {
+          type: "text",
+          dy: -8,
+          fontSize: 11,
 
-      // Tooltip
-      tooltip: [
-        { field: "year", type: "ordinal" },
-        { field: "taxi_type", type: "nominal" },
-        {
-          aggregate: "sum",
-          field: "trip_count",
-          type: "quantitative",
-          title: "Trips"
+        },
+
+        encoding: {
+          x: {
+            field: "year",
+            type: "ordinal"
+          },
+
+          y: {
+            value: 0
+          },
+
+          text: {
+            field: "label"
+          }
         }
-      ]
-    }
+      }
+    ]
   };
 }
 
 // Load data
 function init() {
-    // Ensure the path points to the correct location of your generated CSV
-    // d3.csv("data/market-share/taxi_trip_data_2013_2023.csv", d => ({
-    //     // Use the unary plus (+) operator to convert strings to numbers
-    //     year: +d.year,
-    //     taxi_type: d.taxi_type,
-    //     trip_count: +d.trip_count,
-    //     share: +d.share
-    // })).then(data => {
-    //     // Call your visualization drawing functions with the formatted data
-    //     createVis2(data);
-    //     createVis3(data); // Note: updated from 'allData' to 'data' to use the loaded CSV
-    //     createVis4(data);
-    //
-    //     console.log("Data Loaded Successfully:", data);
-    // }).catch(error => {
-    //     console.error("Error loading the CSV file:", error);
-    // });
   Promise.all([
     d3.json("data/choropleth/nyc_boroughs.geojson"),
     d3.csv("data/choropleth/mock_zone_hourly.csv", d => ({
@@ -460,7 +480,7 @@ function init() {
       trip_count: +d.trip_count,
       trip_price: d.trip_price === "" ? null : +d.trip_price
     })),
-    d3.csv("data/market-share/taxi_trip_data_2013_2023.csv", d => ({
+    d3.csv("data/processed/yearly_market_share.csv", d => ({
         // Use the unary plus (+) operator to convert strings to numbers
         year: +d.year,
         taxi_type: d.taxi_type,
