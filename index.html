@@ -34,7 +34,18 @@
 
     <h2>Dwarakesh's Visualization: Heat map</h2>
     <!-- Dwarakesh's Visualization -->
-    <div id="vis4"></div> 
+    <div id="vis4">
+        <div class="vis4-app">
+            <h3 id="vis4-title">City Wake Up: Total Trips by Hour and Day of Week</h3>
+            <p class="vis4-sub" id="vis4-subtitle"></p>
+            <div class="vis4-controls">
+                <label for="vis4-taxi-type">Taxi type</label>
+                <select id="vis4-taxi-type" aria-label="Taxi type"></select>
+            </div>
+            <div id="vis4-chart-wrap"></div>
+        </div>
+    </div>
+    <div id="vis4-tooltip" role="status" aria-live="polite"></div>
 
     <h2>Dataset</h2>
 

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project processes NYC Taxi and Limousine Commission (TLC) trip data into cleaned, aggregated datasets for two visualization panels:
+This project processes NYC Taxi and Limousine Commission (TLC) trip data into cleaned, aggregated datasets for three visualization panels:
 
 1. **Yearly Market Share (Ivan)**
 
@@ -14,10 +14,11 @@ This project processes NYC Taxi and Limousine Commission (TLC) trip data into cl
    * Output: `data/processed/zone_hourly.csv`
    * Purpose: Interactive choropleth map of NYC taxi pickups by zone with an hourly time slider
 
-3. **Visualization 3 (Dwarakesh)**
+3. **Hour × weekday heatmap (Dwarakesh)**
 
-   * Output: `data/processed/weekly_heatmap.csv`
-   * Purpose: ________________________________
+   * Output: `data/processed/heatmap_data.json`
+   * Script: `data/aggregate_heatmap.py`
+   * Purpose: Pre-aggregated trip counts by hour of day (0–23) and ISO day of week (Monday–Sunday), split by vehicle type (yellow, green, FHV, FHVHV) plus an “all types” roll-up for the D3 heatmap on the main project page
 
 The goal is to ensure visualization teammates can replace mock data with real data using the exact same schema and no code changes.
 
@@ -27,19 +28,22 @@ The goal is to ensure visualization teammates can replace mock data with real da
 
 ```text
 /data
+  aggregate_heatmap.py   # DuckDB: monthly parquet → heatmap_data.json
+  preprocess_tlc.py      # Main TLC pipeline → zone_hourly + market share CSVs
+
   /raw
     /yellow        # Yellow taxi parquet files
     /green         # Green taxi parquet files
     /hvfhv         # High-volume for-hire vehicle parquet files
     /fhv           # Traditional for-hire vehicle parquet files
     /zones         # Taxi zone lookup CSV
+    # aggregate_heatmap.py also accepts flat monthly files in /raw, e.g.:
+    #   green_tripdata_2026-01.parquet, yellow_tripdata_2026-01.parquet, …
 
   /processed
     zone_hourly.csv
     yearly_market_share.csv
-
-/scripts
-  preprocess_tlc.py
+    heatmap_data.json     # Heatmap bundle for vis4 (see Output 3)
 ```
 
 ---
@@ -190,6 +194,74 @@ share = trip_count / total trips that year
 
 ---
 
+# Output 3: heatmap_data.json
+
+## Purpose
+
+Supports **Dwarakesh’s heatmap** (`#vis4` on the shared `index.html`): trip volume by **hour of day** and **day of week**, with a dropdown to switch vehicle type or view all types combined.
+
+## Output file
+
+```text
+data/processed/heatmap_data.json
+```
+
+## Producer script
+
+```text
+data/aggregate_heatmap.py
+```
+
+Run from the **project root** (recommended):
+
+```bash
+python data/aggregate_heatmap.py
+```
+
+**Inputs:** Parquet files placed directly under `data/raw/`, with stems and pickup datetime columns defined in `TYPE_SPECS` inside `aggregate_heatmap.py` (for example `green_tripdata_2026-01.parquet` with column `lpep_pickup_datetime`). Adjust `TYPE_SPECS` and `monthLabel` in the script when you switch months or filenames.
+
+**Implementation:** DuckDB reads each parquet, aggregates `COUNT(*)` by hour and ISO day-of-week, normalizes to a full 7×24 grid (missing cells as zero), then writes one JSON object.
+
+## Top-level JSON schema
+
+| Field        | Type   | Description |
+| ------------ | ------ | ----------- |
+| `monthLabel` | string | Human-readable label shown in the UI (e.g. `Jan 2026`) |
+| `types`      | object | Keys: `all`, `green`, `yellow`, `fhv`, `fhvhv` (see script for exact keys) |
+
+Each value under `types` is an object:
+
+```json
+{ "cells": [ ... ] }
+```
+
+## `cells` array
+
+Each element is one bucket:
+
+| Field   | Type    | Description |
+| ------- | ------- | ----------- |
+| `dow`   | integer | ISO day of week: **1 = Monday** … **7 = Sunday** |
+| `hour`  | integer | Hour of day **0–23** (pickup hour) |
+| `count` | integer | Trip count in that bucket |
+
+The array is ordered consistently: for each `dow` from 1 to 7, for each `hour` from 0 to 23 (168 entries per type).
+
+## Processing steps (heatmap script)
+
+1. For each configured parquet file under `data/raw/`, run a DuckDB query: extract hour and ISO day-of-week from the TLC pickup timestamp, filter null timestamps, group and count.
+2. Expand query results to a full grid so every (dow, hour) pair exists.
+3. Build `types.all` by summing counts across vehicle-type grids cell-wise.
+4. Write `data/processed/heatmap_data.json`.
+
+## Validation rules
+
+* Each type’s `cells` length should be **168** (7 × 24).
+* `dow` must be in **1…7**, `hour` in **0…23**.
+* Keys under `types` must match what `js/script.js` expects in `TYPE_LABELS` for the dropdown (`all`, `green`, `yellow`, `fhv`, `fhvhv`).
+
+---
+
 # Methodology Note: HVFHV vs FHV Classification
 
 ## Why This Is Difficult
@@ -313,11 +385,11 @@ These files are excluded using `.gitignore` because:
 
 The GitHub repository should include:
 
-* preprocessing scripts (`scripts/`)
+* preprocessing scripts (e.g. `data/preprocess_tlc.py`, `data/aggregate_heatmap.py`)
 * README documentation
 * schema definitions
 * lightweight processed outputs if needed
-* visualization-facing CSV outputs
+* visualization-facing CSV and JSON outputs (e.g. `heatmap_data.json`)
 
 but should not include raw monthly parquet downloads.
 
@@ -329,17 +401,27 @@ If any preprocessing needs to be rerun or updated, Emily will handle the pipelin
 
 ## Running the Pipeline
 
-From the project root:
+From the project root.
+
+**Main TLC pipeline** (choropleth + market share CSVs):
 
 ```bash
-python scripts/preprocess_tlc.py
+python data/preprocess_tlc.py
 ```
 
 This will:
 
-1. Generate both processed CSV files
+1. Generate both processed CSV files (`zone_hourly.csv`, `yearly_market_share.csv`—exact outputs depend on script configuration)
 2. Run validation checks
 3. Print confirmation messages
+
+**Heatmap JSON** (after placing the expected monthly parquet files under `data/raw/`):
+
+```bash
+python data/aggregate_heatmap.py
+```
+
+This writes `data/processed/heatmap_data.json` only (it does not run the full TLC pipeline).
 
 ---
 
@@ -369,7 +451,7 @@ Responsible for:
 * reviewing and refining preprocessing logic
 * validating methodology decisions
 * helping debug and improve the more complex HVFHV vs FHV market share classification
-* leading preprocessing and data preparation for Visualization 3 (Dwarakesh)
+* leading preprocessing and data preparation for Dwarakesh’s heatmap (`heatmap_data.json` / `aggregate_heatmap.py`)
 
 ### Visualization Students
 
