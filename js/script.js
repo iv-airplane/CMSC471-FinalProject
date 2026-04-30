@@ -264,11 +264,29 @@ function createDonutChart() {
                     baseline: "middle",
                     color: "#666"
                 },
+                // Add the clarifying label
                 encoding: {
-                    text: { value: "share" }
+                    text: { value: "total trips" }
+                }
+            },
+            // Display Total number of trips for the selecyed year
+            {
+                mark: {
+                    type: "text",
+                    fontSize: 12,
+                    dy: 20,
+                    align: "center",
+                    baseline: "middle",
+                    color: "#333"
+                },
+                encoding: {
+                    text: {
+                    aggregate: "sum",
+                    field: "trip_count",
+                    format: ","
+                    }
                 }
             }
-            // Total trips for the specific year
         ]
     };
 }
@@ -304,7 +322,7 @@ function createLegendChart() {
                     x: { value: 10 }
                 }
             },
-            // Labels (Uber, Yellow cab...)
+            // Labels for taxis (Uber, Yellow cab...)
             {
                 mark: {
                     type: "text",
@@ -370,7 +388,8 @@ function createStackedBarChart() {
                     size: 18
                 },
                 
-                /* Parameters should live ONLY in the 
+                /* 
+                   Parameters should live ONLY in the 
                    chart of intereset not at the top level
                    to avoid errors
                 */
