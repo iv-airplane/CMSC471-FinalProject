@@ -238,7 +238,7 @@ function createDonutChart() {
                     }
                 }
             },
-            // 🔤 Center label (year)
+            // Center label (year) for the donut chart
             {
                 mark: {
                     type: "text",
@@ -268,6 +268,7 @@ function createDonutChart() {
                     text: { value: "share" }
                 }
             }
+            // Total trips for the specific year
         ]
     };
 }
@@ -342,7 +343,11 @@ function createTopRow() {
         // This transform filters the data feeding into the top row 
         // based on the current selection from the bar chart
         transform: [
-            { filter: { param: "yearSelection" } }
+            { 
+                // If yearSelection exists, filter by the selected year. 
+                // Otherwise, show only 2020.
+                filter: "yearSelection.year ? datum.year === yearSelection.year[0] : datum.year === 2020"
+            }
         ],
         hconcat: [
             createDonutChart(),
@@ -377,8 +382,7 @@ function createStackedBarChart() {
                             fields: ["year"],
                             on: "click",
                             clear: "dblclick"
-                        },
-                        value: { year: 2020 }
+                        }
                     }
                 ],
                 encoding: {
@@ -409,7 +413,7 @@ function createStackedBarChart() {
                     },
                     // Highlight the selected bar
                     opacity: {
-                        condition: { param: "yearSelection", empty: false, value: 1 },
+                        condition: { param: "yearSelection", value: 1 },
                         value: 0.4
                     },
                     tooltip: [
