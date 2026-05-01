@@ -748,9 +748,29 @@ function createVis4(bundle) {
 
     const sel = g.selectAll("rect.cell").data(cells, key);
     sel.exit().remove();
-    const ent = sel.enter().append("rect").attr("class", "cell").attr("fill", (d) => color(d.count));
+
+    // Enter: position immediately but invisible so we can animate appearance left->right
+    const ent = sel
+      .enter()
+      .append("rect")
+      .attr("class", "cell")
+      .attr("x", (d) => x(String(d.hour)))
+      .attr("y", (d) => y(dayName(d.dow)))
+      .attr("width", x.bandwidth())
+      .attr("height", y.bandwidth())
+      .attr("fill", (d) => color(0))
+      .style("opacity", 0)
+      .on("mouseenter", (event, d) => {
+        tooltip.style("opacity", 1);
+        tooltip.html(tipHtml(d));
+        positionTooltip(event);
+      })
+      .on("mousemove", (event) => positionTooltip(event))
+      .on("mouseleave", () => tooltip.style("opacity", 0));
 
     const merged = ent.merge(sel);
+
+    // Animate color and opacity left-to-right based on hour index
     merged
       .attr("x", (d) => x(String(d.hour)))
       .attr("y", (d) => y(dayName(d.dow)))
@@ -764,7 +784,14 @@ function createVis4(bundle) {
       .on("mousemove", (event) => positionTooltip(event))
       .on("mouseleave", () => tooltip.style("opacity", 0));
 
-    merged.transition().duration(450).ease(d3.easeCubicOut).attr("fill", (d) => color(d.count));
+    const baseDelay = 24; // ms per hour column
+    merged
+      .transition()
+      .delay((d) => (Number(d.hour) || 0) * baseDelay)
+      .duration(480)
+      .ease(d3.easeCubicOut)
+      .style("opacity", 1)
+      .attr("fill", (d) => color(d.count));
   }
 
   function updateChart(typeKey) {
