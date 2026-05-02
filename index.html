@@ -3,66 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Final Project: City Motion</title>
+    <title>City in Motion</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" href='data:image/svg+xml,
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-size="80">🚕</text>
+    </svg>'>
 </head>
 
 <body>
-    <h1>City in Motion: Visualizing Taxi Pickups and Urban Flow in New York City</h1>
+    <main>
+        <header >
+            
+            <h1>City in <span class="accent">Motion</span></h1>
+            <p class = "subtitle">
+                Visualizing taxi pickups and urban flow in New York City
+            </p>
+            <div class="divider"></div>
+            <p class="project-intro">
+                New York City’s transportation system is constantly in motion, shaped by 
+                <span class="emphasis">where</span> people go,
+                <span class="emphasis">when</span> they travel, and 
+                <span class="emphasis">how</span> 
+                they choose to get around. This project uses NYC Taxi and Limousine Commission
+                (TLC) data to explore taxi and ride-hailing activity across the city. Through interactive
+                visualizations, explore where trips are concentrated, how demand shifts,
+                and how transportation modes have evolved over time.
+            </p>
+        </header>
 
-    <h2>Proposal</h2>
 
-    <p>
-        This project explores how transportation activity changes throughout the day in New York City. 
-        We plan to build an interactive, animated map that shows taxi and ride-sharing pickup density over a 24 hour period, 
-        allowing users to move through the day and directly compare patterns between weekdays and weekends (either through a continuous 48-hour view or toggle).
-        In addition, users will be able to jump to key moments in the day, such as lunch or evening rush hour, to see how the activity shifts at different points. The goal of this main visualization is to give a clear sense of how the city “moves”
-         throughout the day in a way that isn't obvious from raw data.</p>
-    <p>
-        To support this map, we'll include a couple of supporting charts to show broader trends. A layered bar chart will show the shares of trips taken by different vehicle types (yellow taxis, green taxis, and for-hire vehicles like Uber/Lyft), 
-        allowing users to compare how the market share has changed over time, notably since Uber's founding in 2009. We will also create a heatmap with hour of the day on the x-axis and day of the week on the y-axis, where color represents trip volume. 
-        This will help us highlight recurring patterns such as weekday commuting behavior versus weekend nightlife activity. 
-    </p>
+        <!-- <h2>Proposal</h2>
 
-    <h2>Ryley's Visualization: Choropleth map</h2>
-    <!-- Ryley's Visualization -->
-    <div id="vis2"></div> 
+        <p>
+            This project explores how transportation activity changes throughout the day in New York City. 
+            We plan to build an interactive, animated map that shows taxi and ride-sharing pickup density over a 24 hour period, 
+            allowing users to move through the day and directly compare patterns between weekdays and weekends (either through a continuous 48-hour view or toggle).
+            In addition, users will be able to jump to key moments in the day, such as lunch or evening rush hour, to see how the activity shifts at different points. The goal of this main visualization is to give a clear sense of how the city “moves”
+            throughout the day in a way that isn't obvious from raw data.</p>
+        <p>
+            To support this map, we'll include a couple of supporting charts to show broader trends. A layered bar chart will show the shares of trips taken by different vehicle types (yellow taxis, green taxis, and for-hire vehicles like Uber/Lyft), 
+            allowing users to compare how the market share has changed over time, notably since Uber's founding in 2009. We will also create a heatmap with hour of the day on the x-axis and day of the week on the y-axis, where color represents trip volume. 
+            This will help us highlight recurring patterns such as weekday commuting behavior versus weekend nightlife activity. 
+        </p> -->
 
-    <h2>Ivan's visualization: Market share throught the years</h2>
-    <!-- Ivan's visualization -->
-    <div id="vis3"></div> 
+        <section class = "dataset-section">
+            <h2>Dataset</h2>
+            
+            <p>
+                This project uses trip data from the 
+                <a href="https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page" target="_blank">
+                NYC Taxi and Limousine Commission (TLC Trip Record Data)
+                </a>. The dataset contains detailed records of taxi and for-hire vehicle trips,
+                including pickup time, location, and vehicle type, and spans millions of trips each month.
+            </p>
 
-    <h2>Dwarakesh's Visualization: Heat map</h2>
-    <!-- Dwarakesh's Visualization -->
-    <div id="vis4">
-        <div class="vis4-app">
-            <h3 id="vis4-title">City Wake Up: Total Trips by Hour and Day of Week</h3>
-            <p class="vis4-sub" id="vis4-subtitle"></p>
-            <div class="vis4-controls">
-                <label for="vis4-taxi-type">Taxi type</label>
-                <select id="vis4-taxi-type" aria-label="Taxi type"></select>
+            <p>
+                For our analysis, we focus on a few key fields: taxi zone ID, borough, pickup date and hour,
+                vehicle type, and total trip count.
+            </p>
+
+            <p>
+                The main vehicle types in the dataset are:
+            </p>
+            <div class="vehicle-grid">
+                <div class="vehicle-tag">
+                    <span class="dot dot--yellow"></span>
+                    <div>
+                        <div class="vehicle-name">Yellow Taxis</div>
+                        <div class="vehicle-desc">Traditional taxis, mostly in Manhattan and at airports</div>
+                    </div>
+                </div>
+                <div class="vehicle-tag">
+                    <span class="dot dot--green"></span>
+                    <div>
+                        <div class="vehicle-name">Green Taxis</div>
+                        <div class="vehicle-desc">Traditional taxis, mostly in the outer boroughs</div>
+                    </div>
+                </div>
+                <div class="vehicle-tag">
+                    <span class="dot dot--orange"></span>
+                    <div>
+                        <div class="vehicle-name">For-Hire Vehicles (FHV)</div>
+                        <div class="vehicle-desc">Pre-booked car services like limousines and black cars</div>
+                    </div>
+                </div>
+                <div class="vehicle-tag">
+                    <span class="dot dot--blue"></span>
+                    <div>
+                        <div class="vehicle-name">High Volume FHV (HVFHV)</div>
+                        <div class="vehicle-desc">App-based services like Uber and Lyft</div>
+                    </div>
+                </div>
             </div>
-            <div id="vis4-chart-wrap"></div>
-        </div>
-    </div>
-    <div id="vis4-tooltip" role="status" aria-live="polite"></div>
+        </section>
 
-    <h2>Dataset</h2>
 
-    <p>
-        We will use trip data from the NYC Taxi and Limousine Commission (TLC Trip Record Data). This dataset includes detailed information on taxi and for-hire vehicle trips in New York City, such as pickup time, location, and type of vehicle. 
-        The dataset is large and fairly complex, with millions of trips recorded each month over multiple years. Since each trip has many details, we need to aggregate the data to make it readable and meaningful. It also becomes more complex when comparing different vehicle types and looking at changes over time, especially before and after the congestion pricing policy. These factors make this dataset a good fit for an interactive visualization that can help reveal patterns that wouldn’t be obvious in raw data.
 
-    </p>
+        <!-- Ryley's Visualization -->
+        <section>
+            <h2>Choropleth Map: Where do taxi trips happen?</h2>
+            <p>
+                This map shows taxi and for-hire vehicle pickups across NYC taxi zones for a single day.
+                Each zone is colored based on the number of trips during a selected hour, with darker colors
+                indicating higher activity. Use the slider or play button to move through the day and switch
+                between vehicle types to compare patterns.
+            </p>
+            <div id="vis2"></div> 
+        </section>
+
         
-    <!-- Load all the necessary libraries and our script -->
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="js/script.js"></script>
 
-    <!-- Load vega-lite -->
-    <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@6"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+        <!-- Dwarakesh's Visualization -->
+        <section class = "viz-section">
+            <h2>Heat Map: When do taxi trips happen?</h2>
+            <p>
+                This heatmap shows trip volume by hour of day and day of week. Each cell represents a specific
+                time period, with darker colors indicating higher activity. Use the dropdown to compare patterns
+                across vehicle types.
+            </p>
+        <div id="vis4">
+            <div class="vis4-app">
+                <h3 id="vis4-title">City Wake Up: Total Trips by Hour and Day of Week</h3>
+                <p class="vis4-sub" id="vis4-subtitle"></p>
+                <div class="vis4-controls">
+                    <label for="vis4-taxi-type">Taxi type</label>
+                    <select id="vis4-taxi-type" aria-label="Taxi type"></select>
+                </div>
+                <div id="vis4-chart-wrap"></div>
+            </div>
+        </div>
+        <div id="vis4-tooltip" role="status" aria-live="polite"></div>
+        </section>
+
+        <!-- Ivan's visualization -->
+        <section class = "viz-section">
+            <h2>Market Share Chart: How have taxi trips evolved over time?</h2>
+            <p>
+                This chart shows how the share of trips by vehicle type has changed over time. The stacked bars
+                display the proportion of total trips each year, while the donut chart highlights the breakdown
+                for a selected year.
+            </p>
+            <div id="vis3"></div> 
+        </section>
+
+
+        <section class = "implementation-section">
+            <h2>Implementation Details</h2>
+
+            <h3>Data Processing</h3>
+            <p>
+                The TLC dataset is very large, with millions of trips recorded each month, so we
+                first needed to process and aggregate the data before using it in our visualizations.
+                We used DuckDB to efficiently query the raw trip-level data and generate smaller,
+                analysis-ready datasets.
+            </p>
+
+            <p>
+                From the original data, we created several aggregated datasets:
+            </p>
+            <ul>
+                <li>Trips by taxi zone, hour, and date (for the chloropleth map)</li>
+                <li>Trips by day of week and hour (for the heatmap)</li>
+                <li>Trips by year and vehicle type (for market share trends)</li>
+            </ul>
+
+            <p>
+                One challenge we encountered was that before 2019, high-volume FHV (HVFHV) trips
+                were not tracked separately and were grouped with other FHV trips. As ride-hailing
+                services became more common, the data began separating these categories. To make
+                comparisons consistent over time, we manually split FHV and HVFHV during preprocessing.
+            </p>
+
+            <p>
+                To support the spatial visualization, we used NYC taxi zone shapefiles and converted
+                them into GeoJSON using Mapshaper so they could be rendered in the browser.
+            </p>
+
+            <h3>Visualization</h3>
+            <p>
+                The visualizations are built using D3 and Vega-Lite. We use a taxi zone choropleth map
+                to show how trip activity varies across space, a heatmap to highlight patterns across
+                time, and a stacked bar chart with a donut chart to show changes in market share over time.
+            </p>
+
+            <p>
+                We chose a choropleth map to represent spatial patterns because it allows for easy
+                comparison across zones, and a heatmap to show dense temporal patterns without clutter.
+                The market share visualization uses normalized stacked bars to emphasize proportions
+                rather than absolute values.
+            </p>
+
+            <p>
+                Interactive elements such as sliders, dropdowns, and tooltips allow users to explore
+                different time periods and vehicle types, making it easier to compare patterns and
+                understand how transportation activity changes across the city.
+            </p>
+        </section>
+        
+            
+        <section class="sources-section">
+            <h2>Sources</h2>
+
+            <ul>
+                <li>
+                NYC Taxi and Limousine Commission (TLC) Trip Record Data and Taxi Zones Shapefile: 
+                <a href="https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page" target="_blank">
+                    https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+                </a>
+                </li>
+
+                <li>
+                Mapshaper (used to convert shapefiles to GeoJSON): 
+                <a href="https://mapshaper.org/" target="_blank">
+                    https://mapshaper.org/
+                </a>
+                </li>
+
+                <li>
+                DuckDB (used for data processing and querying): 
+                <a href="https://duckdb.org/" target="_blank">
+                    https://duckdb.org/
+                </a>
+                </li>
+
+                <li>
+                D3.js (used for custom visualizations): 
+                <a href="https://d3js.org/" target="_blank">
+                    https://d3js.org/
+                </a>
+                </li>
+
+                <li>
+                Vega-Lite (used for market share visualizations): 
+                <a href="https://vega.github.io/vega-lite/" target="_blank">
+                    https://vega.github.io/vega-lite/
+                </a>
+                </li>
+            </ul>
+            </section>
+
+            <!-- Load all the necessary libraries and our script -->
+            <script src="https://d3js.org/d3.v7.min.js"></script>
+            <script src="js/script.js"></script>
+
+            <!-- Load vega-lite -->
+            <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
+            <script src="https://cdn.jsdelivr.net/npm/vega-lite@6"></script>
+            <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+            
+        </body>
+    </main>
     
-</body>
+    
 </html>
