@@ -683,7 +683,7 @@ function createVis4(bundle) {
     .attr("y", 54)
     .attr("text-anchor", "middle")
     .style("font-size", "12px")
-    .text("Hour of day (0–23)");
+    .text("Hour of day (1–24)");
 
   g.append("g")
     .attr("class", "axis")
@@ -705,6 +705,15 @@ function createVis4(bundle) {
   const tooltip = d3.select("#vis4-tooltip");
   tooltip.style("opacity", 0);
 
+  function showTooltip(html, event) {
+    tooltip.style("opacity", 1).html(html);
+    positionTooltip(event);
+  }
+
+  function hideTooltip() {
+    tooltip.style("opacity", 0);
+  }
+
   const selectEl = d3.select("#vis4-taxi-type");
 
   function positionTooltip(event) {
@@ -718,12 +727,17 @@ function createVis4(bundle) {
     tooltip.style("left", x0 + "px").style("top", y0 + "px");
   }
 
-  function drawLegend(maxVal, color) {
+  function drawLegend(maxVal, color, typeKey) {
     legendG.selectAll("*").remove();
     const lh = innerHeight;
     const lw = 18;
     const n = 48;
     const legendScale = d3.scaleLinear().domain([0, maxVal]).range([lh, 0]);
+    const useThousands = maxVal >= 1000;
+    const formatLegendValue = (value) => {
+      if (!useThousands) return d3.format(",.0f")(value);
+      return `${d3.format(",.1f")(value / 1000).replace(/\.0$/, "")}k`;
+    };
     const bars = d3.range(n).map((i) => {
       const lo = (i / n) * maxVal;
       const hi = ((i + 1) / n) * maxVal;
@@ -740,9 +754,24 @@ function createVis4(bundle) {
       .attr("height", (d) => d.h)
       .attr("fill", (d) => d.c)
       .attr("stroke", "#ccc")
-      .attr("stroke-width", 0.2);
+      .attr("stroke-width", 0.2)
+      .on("mouseenter", (event, d) => {
+        const rangeLo = Math.round(legendScale.invert(d.y + d.h));
+        const rangeHi = Math.round(legendScale.invert(d.y));
+        showTooltip(
+          `<strong>Trips</strong><br/>` +
+            `Range: ${formatLegendValue(rangeLo)} - ${formatLegendValue(rangeHi)}`,
+          event
+        );
+      })
+      .on("mousemove", (event) => positionTooltip(event))
+      .on("mouseleave", hideTooltip);
 
-    const axis = d3.axisRight(legendScale).ticks(6).tickFormat((d) => d3.format(",.0f")(d));
+    const includeMaxTick = !["green", "fhvhv"].includes(typeKey);
+    const axisTickValues = Array.from(
+      new Set(includeMaxTick ? [...legendScale.ticks(6), maxVal] : legendScale.ticks(6))
+    ).sort((a, b) => a - b);
+    const axis = d3.axisRight(legendScale).tickValues(axisTickValues).tickFormat((d) => formatLegendValue(d));
 
     legendG
       .append("g")
@@ -759,7 +788,7 @@ function createVis4(bundle) {
       .attr("text-anchor", "middle")
       .style("font-size", "10px")
       .style("fill", "#555")
-      .text("Trips");
+      .text(useThousands ? "Trips (k)" : "Trips");
   }
 
   function renderCells(cells, color, taxiLabel) {
@@ -822,7 +851,7 @@ function createVis4(bundle) {
     const maxC = d3.max(cells, (d) => d.count) || 1;
     const color = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxC]);
     const taxiLabel = TYPE_LABELS[typeKey];
-    drawLegend(maxC, color);
+    drawLegend(maxC, color, typeKey);
     renderCells(cells, color, taxiLabel);
   }
 
