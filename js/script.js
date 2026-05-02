@@ -620,7 +620,7 @@ function createVis4(bundle) {
     fhvhv: "FHVHV (high-volume / app)",
   };
 
-  const margin = { top: 16, right: 100, bottom: 48, left: 88 };
+  const margin = { top: 16, right: 220, bottom: 72, left: 120 };
   const innerWidth = 24 * 28;
   const innerHeight = 7 * 36;
   const width = margin.left + innerWidth + margin.right;
@@ -632,8 +632,9 @@ function createVis4(bundle) {
   const svg = wrap
     .append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("width", width)
-    .attr("height", height);
+    .attr("width", "100%")
+    .attr("height", height)
+    .attr("preserveAspectRatio", "xMidYMid meet");
 
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -642,22 +643,44 @@ function createVis4(bundle) {
     .domain(d3.range(24).map(String))
     .range([0, innerWidth])
     .paddingInner(0.02)
+    .paddingOuter(0.03)
     .paddingOuter(0);
 
   const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const y = d3.scaleBand().domain(dayOrder).range([0, innerHeight]).paddingInner(0.02).paddingOuter(0);
 
-  const xAxis = d3.axisBottom(x).tickValues(d3.range(0, 24, 2).map(String));
+  const xAxis = d3.axisBottom(x).tickValues(d3.range(1, 24, 2).map(String));
   const yAxis = d3.axisLeft(y);
 
-  g.append("g")
-    .attr("class", "axis")
-    .attr("transform", `translate(0,${innerHeight})`)
-    .call(xAxis)
+  const xAxisG = g.append("g").attr("class", "axis").attr("transform", `translate(0,${innerHeight})`).call(xAxis);
+  xAxisG.selectAll("text").attr("text-anchor", "middle").attr("dy", "0.75em");
+  // Replace tick labels (which are odd hours: 1,3,...,23) with even labels 2,4,...,24
+  xAxisG.selectAll(".tick text").text((d) => String(Number(d) + 1));
+  // Position tick groups at the center of each hour band so labels sit on the mid-ticks
+  xAxisG.selectAll(".tick").attr("transform", function (d) {
+    const xPos = x(String(d));
+    const mid = (xPos != null ? xPos : innerWidth) + x.bandwidth() / 2;
+    return `translate(${mid},0)`;
+  });
+  // Add a small centered tick for each hour band (hours 1..24 mapped to bands 0..23)
+  const midHours = d3.range(24);
+  xAxisG
+    .selectAll("line.mid-tick")
+    .data(midHours)
+    .join("line")
+    .attr("class", "mid-tick")
+    .attr("x1", (d) => x(String(d)) + x.bandwidth() / 2)
+    .attr("x2", (d) => x(String(d)) + x.bandwidth() / 2)
+    .attr("y1", 0)
+    .attr("y2", 6)
+    .attr("stroke", "#666")
+    .attr("stroke-width", 0.6);
+  // Note: final '24' label is provided by converting the 23 tick to 24 above
+  xAxisG
     .append("text")
     .attr("fill", "#333")
     .attr("x", innerWidth / 2)
-    .attr("y", 40)
+    .attr("y", 54)
     .attr("text-anchor", "middle")
     .style("font-size", "12px")
     .text("Hour of day (0–23)");
@@ -669,7 +692,7 @@ function createVis4(bundle) {
     .attr("fill", "#333")
     .attr("transform", "rotate(-90)")
     .attr("x", -innerHeight / 2)
-    .attr("y", -56)
+    .attr("y", -84)
     .attr("text-anchor", "middle")
     .style("font-size", "12px")
     .text("Day of week");
