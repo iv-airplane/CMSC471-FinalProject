@@ -46,12 +46,13 @@ const tooltip = d3
   .style("font-size", "12px")
   .style("box-shadow", "0 2px 8px rgba(0,0,0,0.12)");
 
-function createVis(zoneHourly, boroughsGeojson) {
+function createVis(zoneHourly, taxiZonesGeojson) {
   const state = {
     ...TIME_OPTIONS[0],
     vehicleType: VIS2_DEFAULT_VEHICLE
   };
-  let byBorough = new Map();
+
+  let byZone = new Map();
   let fixedMaxVal = 1;
   let currentColorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, 1]);
 
@@ -67,6 +68,7 @@ function createVis(zoneHourly, boroughsGeojson) {
   const vehicleTypes = Array.from(new Set(zoneHourly.map(d => d.vehicle_type))).sort((a, b) =>
     a.localeCompare(b)
   );
+
   const vehicleOptions = [{ value: "all", label: "All types" }].concat(
     vehicleTypes.map(v => ({ value: v, label: v }))
   );
@@ -76,23 +78,21 @@ function createVis(zoneHourly, boroughsGeojson) {
   }
 
   const title = svg
-      .append("text")
-      .attr("x", margin.left)
-      .attr("y", 22)
-      .attr("font-size", 16)
-      .attr("font-weight", 700)
-      .text(
-          `NYC Pickups by Borough — ${getVehicleLabel(state.vehicleType)}, ${state.label}`
-      );
+    .append("text")
+    .attr("x", margin.left)
+    .attr("y", 22)
+    .attr("font-size", 16)
+    .attr("font-weight", 700)
+    .text(`NYC Pickups by Taxi Zone — ${getVehicleLabel(state.vehicleType)}, ${state.label}`);
 
   const subtitle = svg
-      .append("text")
-      .attr("class", "vis2-subtitle")
-      .attr("x", margin.left)
-      .attr("y", 40)
-      .attr("font-size", 12)
-      .attr("fill", "#444")
-      .text("");
+    .append("text")
+    .attr("class", "vis2-subtitle")
+    .attr("x", margin.left)
+    .attr("y", 40)
+    .attr("font-size", 12)
+    .attr("fill", "#444")
+    .text("");
 
   function formatHourlyTotal(total) {
     return `Total trips this hour: ${d3.format(",")(Math.round(total))}`;
@@ -100,34 +100,37 @@ function createVis(zoneHourly, boroughsGeojson) {
 
   const vis2Rows = zoneHourly.filter(d => d.pickup_date === VIS2_DATE);
 
-  const byVehicleHourBorough = d3.rollup(
+  const byVehicleHourZone = d3.rollup(
     vis2Rows,
-    rs => d3.sum(rs, r => r.trip_count),
+    rs => d3.sum(rs, r => +r.trip_count),
     d => d.vehicle_type,
-    d => d.pickup_hour,
-    d => d.borough
+    d => +d.pickup_hour,
+    d => +d.zone_id
   );
 
-  const byHourBoroughAll = d3.rollup(
+  const byHourZoneAll = d3.rollup(
     vis2Rows,
-    rs => d3.sum(rs, r => r.trip_count),
-    d => d.pickup_hour,
-    d => d.borough
+    rs => d3.sum(rs, r => +r.trip_count),
+    d => +d.pickup_hour,
+    d => +d.zone_id
   );
 
-  function computeByBorough(hour, vehicleType) {
+  function computeByZone(hour, vehicleType) {
     if (vehicleType === "all") {
-      return byHourBoroughAll.get(hour) ?? new Map();
+      return byHourZoneAll.get(+hour) ?? new Map();
     }
-    return byVehicleHourBorough.get(vehicleType)?.get(hour) ?? new Map();
+    return byVehicleHourZone.get(vehicleType)?.get(+hour) ?? new Map();
   }
 
   function computeFixedMax(vehicleType) {
-    const byHour = vehicleType === "all"
-      ? byHourBoroughAll
-      : byVehicleHourBorough.get(vehicleType) ?? new Map();
+    const byHour =
+      vehicleType === "all"
+        ? byHourZoneAll
+        : byVehicleHourZone.get(vehicleType) ?? new Map();
+
     const maxVal =
-      d3.max(Array.from(byHour.values(), boroughMap => d3.max([...boroughMap.values()]) ?? 0)) ?? 1;
+      d3.max(Array.from(byHour.values(), zoneMap => d3.max([...zoneMap.values()]) ?? 0)) ?? 1;
+
     return Math.max(1, maxVal);
   }
 
@@ -138,37 +141,46 @@ function createVis(zoneHourly, boroughsGeojson) {
     updateLegend(vehicleType);
   }
 
-  const projection = d3.geoMercator().fitExtent(
+  const projection = d3.geoIdentity()
+  .reflectY(true)
+  .fitExtent(
     [
       [margin.left, margin.top],
       [width - margin.right, height - margin.bottom - 46]
     ],
-    boroughsGeojson
+    taxiZonesGeojson
   );
+
+
   const path = d3.geoPath(projection);
 
   const mapPaths = svg
     .append("g")
     .selectAll("path")
-    .data(boroughsGeojson.features)
+    .data(taxiZonesGeojson.features)
     .join("path")
     .attr("d", path)
     .attr("stroke", "#555")
-    .attr("stroke-width", 0.8)
+    .attr("stroke-width", 0.35)
     .attr("fill", f => {
-      const borough = f.properties.BoroName ?? f.properties.borough;
-      const v = byBorough.get(borough);
+      const zoneId = +f.properties.LocationID;
+      const v = byZone.get(zoneId);
       return Number.isFinite(v) ? currentColorScale(v) : "#f2f2f2";
     })
     .on("mousemove", (event, f) => {
-      const borough = f.properties.BoroName ?? f.properties.borough;
-      const v = byBorough.get(borough);
+      const zoneId = +f.properties.LocationID;
+      const zoneName = f.properties.zone || f.properties.Zone || `Zone ${zoneId}`;
+      const borough = f.properties.borough || f.properties.Borough || "";
+      const v = byZone.get(zoneId);
+
       tooltip
         .style("opacity", 1)
         .style("left", `${event.pageX + 12}px`)
         .style("top", `${event.pageY + 12}px`)
         .html(
-          `<div style="font-weight:700;margin-bottom:4px;">${borough}</div>` +
+          `<div style="font-weight:700;margin-bottom:4px;">${zoneName}</div>` +
+            `<div><b>Zone ID:</b> ${zoneId}</div>` +
+            `<div><b>Borough:</b> ${borough}</div>` +
             `<div><b>Time:</b> ${state.label}</div>` +
             `<div><b>Vehicle:</b> ${getVehicleLabel(state.vehicleType)}</div>` +
             `<div><b>Trip count:</b> ${
@@ -178,20 +190,6 @@ function createVis(zoneHourly, boroughsGeojson) {
     })
     .on("mouseleave", () => tooltip.style("opacity", 0));
 
-  svg
-    .append("g")
-    .selectAll("text")
-    .data(boroughsGeojson.features)
-    .join("text")
-    .attr("class", "labels")
-    .attr("x", d => path.centroid(d)[0])
-    .attr("y", d => path.centroid(d)[1])
-    .attr("text-anchor", "middle")
-    .attr("dominant-baseline", "middle")
-    .attr("font-size", 11)
-    .attr("fill", "#222")
-    .text(d => d.properties.BoroName ?? d.properties.borough);
-
   // Legend
   const legendW = 260;
   const legendH = 10;
@@ -200,6 +198,7 @@ function createVis(zoneHourly, boroughsGeojson) {
 
   const defs = svg.append("defs");
   const gradId = "vis2-legend-gradient";
+
   const grad = defs
     .append("linearGradient")
     .attr("id", gradId)
@@ -262,21 +261,28 @@ function createVis(zoneHourly, boroughsGeojson) {
 
   function updateLegend(vehicleType) {
     const includeMaxTick = vehicleType !== "all";
+
+    const legendScale = d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]);
+
     const axisTickValues = Array.from(
-      new Set(includeMaxTick ? [...d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]).ticks(5), fixedMaxVal] : d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]).ticks(5))
+      new Set(
+        includeMaxTick
+          ? [...legendScale.ticks(5), fixedMaxVal]
+          : legendScale.ticks(5)
+      )
     ).sort((a, b) => a - b);
 
     legendAxisG.selectAll("*").remove();
+
     legendAxisG
       .call(
         d3
-          .axisBottom(d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]))
+          .axisBottom(legendScale)
           .tickValues(axisTickValues)
-          .tickFormat((d) => formatAdaptiveValue(d))
+          .tickFormat(d => formatAdaptiveValue(d))
       )
       .call(g => g.select(".domain").remove());
 
-    const legendScale = d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]);
     legendAxisG
       .append("rect")
       .attr("x", 0)
@@ -287,6 +293,7 @@ function createVis(zoneHourly, boroughsGeojson) {
       .on("mousemove", function (event) {
         const pos = d3.pointer(event, this)[0];
         const hoverVal = legendScale.invert(pos);
+
         legendTooltip
           .style("opacity", 1)
           .style("left", `${event.pageX + 8}px`)
@@ -297,9 +304,9 @@ function createVis(zoneHourly, boroughsGeojson) {
   }
 
   function updateChoropleth() {
-    byBorough = computeByBorough(state.hour, state.vehicleType);
+    byZone = computeByZone(state.hour, state.vehicleType);
 
-    const hourlyTotal = d3.sum([...byBorough.values()]);
+    const hourlyTotal = d3.sum([...byZone.values()]);
     subtitle.text(formatHourlyTotal(hourlyTotal));
 
     mapPaths
@@ -307,46 +314,16 @@ function createVis(zoneHourly, boroughsGeojson) {
       .duration(250)
       .ease(d3.easeCubicOut)
       .attr("fill", f => {
-        const borough = f.properties.BoroName ?? f.properties.borough;
-        const v = byBorough.get(borough);
+        const zoneId = +f.properties.LocationID;
+        const v = byZone.get(zoneId);
         return Number.isFinite(v) ? currentColorScale(v) : "#f2f2f2";
       });
 
     updateLegend(state.vehicleType);
   }
 
-  legendAxisG
-    .call(
-      d3
-        .axisBottom(d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]))
-        .tickValues(Array.from(
-          new Set([...d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]).ticks(5), fixedMaxVal])
-        ).sort((a, b) => a - b))
-        .tickFormat((d) => formatAdaptiveValue(d))
-    )
-    .call(g => g.select(".domain").remove());
-
-  const legendScale = d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]);
-  legendAxisG
-    .append("rect")
-    .attr("x", 0)
-    .attr("y", -legendH)
-    .attr("width", legendW)
-    .attr("height", legendH)
-    .attr("fill", "transparent")
-    .on("mousemove", function (event) {
-      const pos = d3.pointer(event, this)[0];
-      const hoverVal = legendScale.invert(pos);
-      legendTooltip
-        .style("opacity", 1)
-        .style("left", `${event.pageX + 8}px`)
-        .style("top", `${event.pageY - 24}px`)
-        .html(`<strong>Trip Count</strong><br/>${d3.format(",")(Math.round(hoverVal))} (${formatAdaptiveValue(hoverVal)})`);
-    })
-    .on("mouseleave", () => legendTooltip.style("opacity", 0));
-
-  // Slider structure
   const controls = root.append("div").attr("class", "vis2-controls");
+
   controls.html(`
     <div class="vis2-controls-section vis2-vehicle-section">
       <label class="vis2-field-label" for="vis2-vehicle-select">Vehicle type</label>
@@ -389,12 +366,13 @@ function createVis(zoneHourly, boroughsGeojson) {
 
   function syncHourFromIndex(idx) {
     const i = Math.min(TIME_OPTIONS.length - 1, Math.max(0, +idx));
+
     controls.select(".vis2-time-slider").property("value", i);
     Object.assign(state, TIME_OPTIONS[i]);
     controls.select(".vis2-time-value").text(state.label);
-    title.text(
-      `NYC Pickups by Borough — ${getVehicleLabel(state.vehicleType)}, ${state.label}`
-    );
+
+    title.text(`NYC Pickups by Taxi Zone — ${getVehicleLabel(state.vehicleType)}, ${state.label}`);
+
     updateChoropleth();
   }
 
@@ -403,6 +381,7 @@ function createVis(zoneHourly, boroughsGeojson) {
       clearInterval(visRootNode.__vis2PlayDayTimer);
       visRootNode.__vis2PlayDayTimer = null;
     }
+
     playToggle.text("Play day");
   }
 
@@ -411,10 +390,12 @@ function createVis(zoneHourly, boroughsGeojson) {
       stopPlayDay();
       return;
     }
+
     visRootNode.__vis2PlayDayTimer = setInterval(() => {
       const nextIdx = (state.hour + 1) % TIME_OPTIONS.length;
       syncHourFromIndex(nextIdx);
     }, VIS2_PLAY_MS);
+
     playToggle.text("Pause");
   });
 
@@ -426,9 +407,9 @@ function createVis(zoneHourly, boroughsGeojson) {
   controls.select(".vis2-vehicle-select").on("change", e => {
     stopPlayDay();
     state.vehicleType = e.target.value;
-    title.text(
-      `NYC Pickups by Borough — ${getVehicleLabel(state.vehicleType)}, ${state.label}`
-    );
+
+    title.text(`NYC Pickups by Taxi Zone — ${getVehicleLabel(state.vehicleType)}, ${state.label}`);
+
     updateColorScale(state.vehicleType);
     updateChoropleth();
   });
@@ -970,7 +951,7 @@ function init() {
     //     console.error("Error loading the CSV file:", error);
     // });
   Promise.all([
-    d3.json("data/choropleth/nyc_boroughs.geojson"),
+    d3.json("data/zones/taxi_zones.json"),
     d3.csv("data/processed/zone_hourly.csv", d => ({
       zone_id: +d.zone_id,
       borough: d.borough,
