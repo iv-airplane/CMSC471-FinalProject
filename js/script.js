@@ -135,7 +135,7 @@ function createVis(zoneHourly, boroughsGeojson) {
     fixedMaxVal = computeFixedMax(vehicleType);
     currentColorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, fixedMaxVal]);
     gradientStops.attr("stop-color", d => currentColorScale(d * fixedMaxVal));
-    updateLegend();
+    updateLegend(vehicleType);
   }
 
   const projection = d3.geoMercator().fitExtent(
@@ -237,15 +237,63 @@ function createVis(zoneHourly, boroughsGeojson) {
     .append("g")
     .attr("transform", `translate(${legendX}, ${legendY + legendH})`);
 
-  function updateLegend() {
+  const legendTooltip = d3
+    .select("body")
+    .selectAll("div.vis2-legend-tooltip")
+    .data([null])
+    .join("div")
+    .attr("class", "vis2-legend-tooltip")
+    .style("position", "absolute")
+    .style("pointer-events", "none")
+    .style("opacity", 0)
+    .style("background", "white")
+    .style("border", "1px solid #ccc")
+    .style("border-radius", "6px")
+    .style("padding", "6px 8px")
+    .style("font-size", "11px")
+    .style("box-shadow", "0 2px 8px rgba(0,0,0,0.12)");
+
+  function formatAdaptiveValue(value) {
+    if (fixedMaxVal >= 1000) {
+      return `${d3.format(",.1f")(value / 1000).replace(/\.0$/, "")}k`;
+    }
+    return d3.format(",.0f")(value);
+  }
+
+  function updateLegend(vehicleType) {
+    const includeMaxTick = vehicleType !== "all";
+    const axisTickValues = Array.from(
+      new Set(includeMaxTick ? [...d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]).ticks(5), fixedMaxVal] : d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]).ticks(5))
+    ).sort((a, b) => a - b);
+
+    legendAxisG.selectAll("*").remove();
     legendAxisG
       .call(
         d3
           .axisBottom(d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]))
-          .ticks(5)
-          .tickFormat(d3.format("~s"))
+          .tickValues(axisTickValues)
+          .tickFormat((d) => formatAdaptiveValue(d))
       )
       .call(g => g.select(".domain").remove());
+
+    const legendScale = d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]);
+    legendAxisG
+      .append("rect")
+      .attr("x", 0)
+      .attr("y", -legendH)
+      .attr("width", legendW)
+      .attr("height", legendH)
+      .attr("fill", "transparent")
+      .on("mousemove", function (event) {
+        const pos = d3.pointer(event, this)[0];
+        const hoverVal = legendScale.invert(pos);
+        legendTooltip
+          .style("opacity", 1)
+          .style("left", `${event.pageX + 8}px`)
+          .style("top", `${event.pageY - 24}px`)
+          .html(`<strong>Trip Count</strong><br/>${formatAdaptiveValue(hoverVal)}`);
+      })
+      .on("mouseleave", () => legendTooltip.style("opacity", 0));
   }
 
   function updateChoropleth() {
@@ -264,17 +312,38 @@ function createVis(zoneHourly, boroughsGeojson) {
         return Number.isFinite(v) ? currentColorScale(v) : "#f2f2f2";
       });
 
-    updateLegend();
+    updateLegend(state.vehicleType);
   }
 
   legendAxisG
     .call(
       d3
         .axisBottom(d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]))
-        .ticks(5)
-        .tickFormat(d3.format("~s"))
+        .tickValues(Array.from(
+          new Set([...d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]).ticks(5), fixedMaxVal])
+        ).sort((a, b) => a - b))
+        .tickFormat((d) => formatAdaptiveValue(d))
     )
     .call(g => g.select(".domain").remove());
+
+  const legendScale = d3.scaleLinear().domain([0, fixedMaxVal]).range([0, legendW]);
+  legendAxisG
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", -legendH)
+    .attr("width", legendW)
+    .attr("height", legendH)
+    .attr("fill", "transparent")
+    .on("mousemove", function (event) {
+      const pos = d3.pointer(event, this)[0];
+      const hoverVal = legendScale.invert(pos);
+      legendTooltip
+        .style("opacity", 1)
+        .style("left", `${event.pageX + 8}px`)
+        .style("top", `${event.pageY - 24}px`)
+        .html(`<strong>Trip Count</strong><br/>${d3.format(",")(Math.round(hoverVal))} (${formatAdaptiveValue(hoverVal)})`);
+    })
+    .on("mouseleave", () => legendTooltip.style("opacity", 0));
 
   // Slider structure
   const controls = root.append("div").attr("class", "vis2-controls");
@@ -767,7 +836,7 @@ function createVis4(bundle) {
       .on("mousemove", (event) => positionTooltip(event))
       .on("mouseleave", hideTooltip);
 
-    const includeMaxTick = !["green", "fhvhv"].includes(typeKey);
+    const includeMaxTick = !["green", "fhvhv", "all"].includes(typeKey);
     const axisTickValues = Array.from(
       new Set(includeMaxTick ? [...legendScale.ticks(6), maxVal] : legendScale.ticks(6))
     ).sort((a, b) => a - b);
@@ -779,7 +848,8 @@ function createVis4(bundle) {
       .call(axis)
       .selectAll("text")
       .attr("fill", "#444")
-      .style("font-size", "10px");
+      .style("font-size", "9px")
+      .attr("dy", "0.35em");
 
     legendG
       .append("text")
