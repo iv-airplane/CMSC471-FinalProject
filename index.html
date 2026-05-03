@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,32 +9,420 @@
 </head>
 
 <body>
+    <!-- <h1>City in Motion: Visualizing Taxi Pickups and Urban Flow in New York City</h1> -->
+
+
+
+    <!-- ===== STYLES FOR THE INTRO ===== -->
+    <style>
+        /* Typography upgrades — these override the global * rule because element
+     selectors beat the universal selector on specificity. */
+        h1,
+        h2,
+        h3,
+        p,
+        dt,
+        dd,
+        li,
+        .byline,
+        .footnote,
+        .taxi-card,
+        .goals-list {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        h1 {
+            font-size: 2rem;
+            line-height: 1.25;
+            letter-spacing: -0.01em;
+            color: #0f172a;
+            margin-top: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            line-height: 1.3;
+            color: #0f172a;
+            margin-top: 2.25rem;
+            margin-bottom: 0.6rem;
+            padding-bottom: 0.35rem;
+            border-bottom: 2px solid #e5e7eb;
+            letter-spacing: -0.005em;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            line-height: 1.35;
+            color: #1e293b;
+            margin-top: 1.4rem;
+            margin-bottom: 0.4rem;
+        }
+
+        p,
+        dd,
+        li {
+            color: #1f2937;
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .byline {
+            color: #64748b;
+            font-size: 0.92rem;
+            font-style: italic;
+            margin: 0 auto 1.5rem;
+        }
+
+        .lede {
+            font-size: 1.08rem;
+            color: #0f172a;
+            line-height: 1.65;
+        }
+
+        /* Project goals — burnt-orange arrow bullets matching the slider accent */
+        .goals-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 0.5rem auto 1rem;
+        }
+
+        .goals-list li {
+            padding: 0.5rem 0 0.5rem 1.6em;
+            text-indent: -1.6em;
+            line-height: 1.6;
+        }
+
+        .goals-list li::before {
+            content: "→";
+            color: #b45309;
+            font-weight: 700;
+            margin-right: 0.6em;
+            display: inline-block;
+            width: 1em;
+        }
+
+        /* Vehicle category cards — colored left border per type */
+        .taxi-card {
+            background: #f8fafc;
+            border-left: 5px solid #cbd5e1;
+            border-radius: 0 8px 8px 0;
+            padding: 0.85rem 1.1rem 0.95rem;
+            margin: 0.85rem auto;
+        }
+
+        .taxi-card.taxi-yellow {
+            border-left-color: #f0a500;
+        }
+
+        .taxi-card.taxi-green {
+            border-left-color: #4caf7d;
+        }
+
+        .taxi-card.taxi-hvfhv {
+            border-left-color: #3d5a99;
+        }
+
+        .taxi-card.taxi-other {
+            border-left-color: #94a3b8;
+        }
+
+        .taxi-card h3 {
+            margin: 0 0 0.35rem 0;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            color: #0f172a;
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+        }
+
+        .taxi-card p {
+            margin: 0 auto;
+            font-size: 0.97rem;
+            line-height: 1.65;
+        }
+
+        .taxi-swatch {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+
+        /* Brief lead-in paragraph above each visualization */
+        .viz-lead {
+            color: #475569;
+            font-size: 0.97rem;
+            line-height: 1.6;
+            margin: 0.4rem auto 0.9rem;
+        }
+
+        /* Soft tinted backdrop for the design decisions block */
+        .design-decisions {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.5rem 1.25rem 1.1rem;
+            margin: 1rem auto 1.5rem;
+        }
+
+        .design-decisions h2 {
+            border-bottom: none;
+            margin-top: 1rem;
+        }
+
+        .design-decisions h3 {
+            color: #b45309;
+            font-size: 1rem;
+            margin-top: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .footnote {
+            color: #64748b;
+            font-size: 0.85rem;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 0.85rem;
+            margin-top: 2.5rem;
+            line-height: 1.55;
+        }
+
+        code {
+            font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 0.9em;
+            background: #eef2f7;
+            padding: 1px 5px;
+            border-radius: 4px;
+        }
+
+        a {
+            color: #b45309;
+        }
+
+        a:hover {
+            color: #7c2d12;
+        }
+    </style>
+
+    <!-- ===== TITLE & BYLINE ===== -->
     <h1>City in Motion: Visualizing Taxi Pickups and Urban Flow in New York City</h1>
+    <p class="byline">CMSC 471 Final Project &middot; Aadarsh, Dwarakesh, Emily, Ivan, Ryley</p>
 
-    <h2>Proposal</h2>
+    <!-- ===== INTRODUCTION ===== -->
+    <h2>Introduction</h2>
 
-    <p>
-        This project explores how transportation activity changes throughout the day in New York City. 
-        We plan to build an interactive, animated map that shows taxi and ride-sharing pickup density over a 24 hour period, 
-        allowing users to move through the day and directly compare patterns between weekdays and weekends (either through a continuous 48-hour view or toggle).
-        In addition, users will be able to jump to key moments in the day, such as lunch or evening rush hour, to see how the activity shifts at different points. The goal of this main visualization is to give a clear sense of how the city “moves”
-         throughout the day in a way that isn't obvious from raw data.</p>
-    <p>
-        To support this map, we'll include a couple of supporting charts to show broader trends. A layered bar chart will show the shares of trips taken by different vehicle types (yellow taxis, green taxis, and for-hire vehicles like Uber/Lyft), 
-        allowing users to compare how the market share has changed over time, notably since Uber's founding in 2009. We will also create a heatmap with hour of the day on the x-axis and day of the week on the y-axis, where color represents trip volume. 
-        This will help us highlight recurring patterns such as weekday commuting behavior versus weekend nightlife activity. 
+    <p class="lede">
+        New York City moves on four wheels. Every day, more than a million paid trips begin somewhere in the
+        five boroughs &mdash; in a yellow cab outside Grand Central, a green Boro Taxi on Roosevelt Avenue, an
+        Uber summoned from a Brooklyn stoop, a black car waiting outside a hotel. Each of those trips leaves a
+        trace in the public dataset that the NYC Taxi and Limousine Commission (TLC) has been publishing for
+        over a decade. Stitched together, those traces are a remarkably honest record of how a city of 8 million
+        people actually moves: when it commutes, where it goes out at night, which neighborhoods get served and
+        which get skipped, and how a once-stable system was reshaped almost overnight by app-based ride-hail.
     </p>
 
-    <h2>Ryley's Visualization: Choropleth map</h2>
-    <!-- Ryley's Visualization -->
-    <div id="vis2"></div> 
+    <p>
+        Reading that record straight from the raw files is hopeless &mdash; each month is hundreds of thousands
+        of rows of pickup timestamps, drop-off coordinates, fare amounts, and license codes. The patterns are
+        there, but they only become legible once you aggregate, color, and put them in motion. That is what
+        this project is for. We use three coordinated visualizations, each at a different time scale, to turn
+        the TLC archive into something a curious reader can actually <em>see</em>: the long arc of the industry
+        since the rise of Uber and Lyft, the heartbeat of a typical week, and the geographic spread of pickups
+        across a single ordinary day.
+    </p>
 
-    <h2>Ivan's visualization: Market share throught the years</h2>
-    <!-- Ivan's visualization -->
-    <div id="vis3"></div> 
+    <!-- ===== PROJECT GOALS ===== -->
+    <h2>What we want you to be able to see</h2>
 
-    <h2>Dwarakesh's Visualization: Heat map</h2>
-    <!-- Dwarakesh's Visualization -->
+    <p>
+        The visualizations are built around three concrete questions. A reader who spends a few minutes on this
+        page should leave with a defensible answer to each:
+    </p>
+
+    <ul class="goals-list">
+        <li>
+            <strong>How has NYC&rsquo;s for-hire transportation changed over the last decade?</strong>
+            Has the rise of Uber and Lyft eaten into yellow cabs &mdash; and if so, how fast, and what happened
+            to the green Boro Taxis that were introduced in 2013 to fix outer-borough access?
+        </li>
+        <li>
+            <strong>What does a normal week look like?</strong> When are the genuine rush hours, how late does
+            Saturday night actually run, and do app-based services have a different weekly rhythm than yellow
+            cabs?
+        </li>
+        <li>
+            <strong>Where in the city do pickups concentrate, hour by hour?</strong>
+            Does taxi activity move the way we&rsquo;d intuitively expect &mdash; flowing into Midtown in the
+            morning, out to residential boroughs at night &mdash; or are there surprises hiding in the map?
+        </li>
+    </ul>
+
+    <p>
+        These questions matter beyond curiosity. NYC just launched the country&rsquo;s first congestion-pricing
+        program in January 2025, with per-trip surcharges that differ for medallion taxis ($0.75) and
+        high-volume ride-hail ($1.50). Understanding what the pre-pricing baseline looked like &mdash; who
+        served whom, when, and where &mdash; is what makes it possible to ask whether the policy changed
+        anything once a few years of post-2025 data are out.
+    </p>
+
+    <!-- ===== VEHICLE CATEGORIES ===== -->
+    <h2>Meet the four vehicle categories</h2>
+
+    <p>
+        The TLC dataset splits trips into four categories, and the differences between them are not just
+        cosmetic &mdash; they are licensing categories with different legal rights about where they can pick up
+        passengers. Knowing which is which is essential to reading any of the charts below. We use the same
+        color for each category across all three visualizations.
+    </p>
+
+    <div class="taxi-card taxi-yellow">
+        <h3><span class="taxi-swatch" style="background:#f0a500"></span>Yellow medallion taxis</h3>
+        <p>
+            The iconic NYC yellow cab. There are roughly 13,500 medallions in circulation, a number capped by
+            the city, and these are the <em>only</em> vehicles legally allowed to pick up street hails anywhere
+            in the five boroughs &mdash; including all of Manhattan below 96th Street and the airports.
+            Historically the TLC found that about 95% of yellow-cab pickups happened in the Manhattan core or
+            at JFK/LaGuardia, which is exactly the imbalance the green Boro Taxi program was created to fix.
+            Yellow cabs are the deepest historical record in the dataset, going back to 2009.
+        </p>
+    </div>
+
+    <div class="taxi-card taxi-green">
+        <h3><span class="taxi-swatch" style="background:#4caf7d"></span>Green &ldquo;Boro&rdquo; taxis (street-hail
+            liveries)</h3>
+        <p>
+            Apple-green cabs introduced in August 2013 under the Five Borough Taxi Plan. They are allowed to
+            accept street hails only in upper Manhattan (above East 96th / West 110th Street) and in the four
+            outer boroughs &mdash; not in the Manhattan core, and not at the airports for street pickups. They
+            had the same meter rates as yellow cabs and were meant to bring legal, regulated taxi service to
+            neighborhoods that yellow cabs rarely visited. The fleet peaked at around 7,500 active drivers in
+            2015 and has shrunk dramatically since &mdash; an early casualty of the rise of app-based ride-hail.
+            Their decline is one of the clearest stories the data tells.
+        </p>
+    </div>
+
+    <div class="taxi-card taxi-hvfhv">
+        <h3><span class="taxi-swatch" style="background:#3d5a99"></span>High-Volume For-Hire Vehicles (HVFHV)</h3>
+        <p>
+            The TLC&rsquo;s name for app-dispatched ride-hail. Created as a separate reporting category in
+            February 2019, it covers four licensed companies, identified by license codes:
+            <strong>HV0003</strong> Uber, <strong>HV0005</strong> Lyft, <strong>HV0004</strong> Via, and
+            <strong>HV0002</strong> Juno (Via and Juno are no longer operating, leaving Uber and Lyft as
+            essentially the entire category today). HVFHV trips cannot be street-hailed; they have to be booked
+            through an app. This category went from a sliver of the for-hire market in 2015 to the dominant
+            share by the early 2020s &mdash; the single biggest structural change in NYC ground transportation
+            in our lifetimes.
+        </p>
+    </div>
+
+    <div class="taxi-card taxi-other">
+        <h3><span class="taxi-swatch" style="background:#aaaaaa"></span>Other for-hire vehicles (FHV)</h3>
+        <p>
+            Traditional black cars, livery sedans, luxury limousines, and dispatch-only car services.
+            Pre-arranged only &mdash; no street hails. Before 2019 this single dataset also contained all the
+            early Uber and Lyft trips, which is why disentangling pre-2019 ride-hail volume from the rest of
+            the FHV file is the trickiest piece of our preprocessing pipeline.
+        </p>
+    </div>
+
+    <!-- ===== DATASET ===== -->
+    <h2>The dataset</h2>
+
+    <p>
+        All of our data comes from the
+        <a href="https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page">NYC TLC Trip Record Data</a>
+        archive, published as monthly Parquet files. The archive is enormous &mdash; tens of millions of trips
+        per month at peak &mdash; so we never load it directly into the browser. Instead, our preprocessing
+        pipeline (DuckDB + Python) reads the raw files, filters and aggregates them at the right granularity
+        for each visualization, and writes a small CSV or JSON that the page actually loads. Full schema
+        contracts and the methodology for the trickier HVFHV-vs-FHV split live in <code>DATA_README.md</code>
+        in the repo.
+    </p>
+
+    <!-- ===== DESIGN DECISIONS ===== -->
+    <div class="design-decisions">
+        <h2>Design decisions</h2>
+
+        <h3>Three time scales, three charts</h3>
+        <p>
+            The single hardest call early on was whether to build one ambitious view or several smaller, focused
+            ones. We chose three because the dataset answers three different questions at three different time
+            scales, and stretching a single chart across all of them would force us to either average out the
+            weekly patterns (the choropleth would just show a generic Manhattan blob) or hide the decade-long
+            market shift (which is invisible in any one day). The trade-off is that readers have to jump between
+            views; the upside is each view is honest about what it&rsquo;s showing.
+        </p>
+
+        <h3>One color palette, four meanings</h3>
+        <p>
+            Yellow (<code>#f0a500</code>), green (<code>#4caf7d</code>), HVFHV blue (<code>#3d5a99</code>), and
+            gray (<code>#aaaaaa</code>) for other-FHV are reused identically across all three visualizations.
+            Yellow and green are the obvious choices &mdash; they match the actual cabs. Blue for HVFHV reads as
+            &ldquo;tech / app&rdquo; without being a literal Uber or Lyft brand color, which we wanted to avoid
+            because the category includes both. Gray is intentionally muted: &ldquo;other FHV&rdquo; is a
+            residual category and we don&rsquo;t want it competing visually with the three categories the
+            reader actually cares about.
+        </p>
+
+        <h3>Why a Wednesday in October for the choropleth</h3>
+        <p>
+            The map shows a single 24-hour period: Wednesday, October 16, 2024. We picked it deliberately. It
+            is mid-week (no Monday or Friday weekend-tail effects), mid-fall (schools in session, no major
+            holiday nearby, no severe weather in the historical record), and recent enough to reflect the
+            post-pandemic, ride-hail-dominated city, but before congestion pricing took effect on January 5,
+            2025. In other words: as close to a &ldquo;typical&rdquo; modern NYC day as we can pick.
+        </p>
+
+        <h3>A full month for the heatmap, a multi-year span for market share</h3>
+        <p>
+            The hour&times;day heatmap aggregates a whole month so that no single weather event or news day
+            dominates a cell, and so every (day, hour) bucket has enough trips to be a stable estimate. The
+            market-share chart, by contrast, is intentionally coarse &mdash; one row per year per vehicle type.
+            Anything finer would just add noise to a story that is fundamentally about a slow, decade-long
+            structural shift.
+        </p>
+
+        <h3>Sequential color for counts, categorical color for types</h3>
+        <p>
+            Inside any one visualization where we are encoding a single quantity (trip counts on the choropleth,
+            trip counts on the heatmap), we use a sequential color ramp from light to dark so brighter cells
+            unambiguously mean more trips. The four-color categorical palette only appears where we are
+            comparing vehicle <em>types</em> (the market-share chart and the type selector on the heatmap).
+            Mixing the two encodings in the same view would be confusing.
+        </p>
+    </div>
+
+    <!-- ===== VISUALIZATIONS ===== -->
+    <h2>The visualizations</h2>
+
+    <h3>1. Where pickups happen, hour by hour &mdash; choropleth (Ryley)</h3>
+    <p class="viz-lead">
+        Borough-level pickup counts for one Wednesday in October 2024. Drag the slider to move through the
+        24-hour day, or hit play to watch it animate. Switch the vehicle-type dropdown to see how yellow,
+        green, and HVFHV pickups occupy the city differently.
+    </p>
+    <div id="vis2"></div>
+
+    <h3>2. A decade of market share &mdash; stacked bars and donut (Ivan)</h3>
+    <p class="viz-lead">
+        Each year from the start of the modern dataset to the most recent complete year, broken down by the
+        four vehicle categories. The donut on top shows a single selected year in detail; the stacked bars
+        below show the full sweep, including the 2020 COVID collapse and the steady erosion of yellow-cab
+        share by HVFHV.
+    </p>
+    <div id="vis3"></div>
+
+    <h3>3. The pulse of a week &mdash; hour &times; day-of-week heatmap (Dwarakesh)</h3>
+    <p class="viz-lead">
+        Every cell is one (day-of-week, hour) bucket aggregated across an entire month. Use the dropdown to
+        switch which vehicle type is shown. Compare yellow cabs (heaviest in weekday business hours) to HVFHV
+        (which holds onto Friday and Saturday late nights in a way yellow cabs do not).
+    </p>
     <div id="vis4">
         <div class="vis4-app">
             <h3 id="vis4-title">City Wake Up: Total Trips by Hour and Day of Week</h3>
@@ -47,14 +436,49 @@
     </div>
     <div id="vis4-tooltip" role="status" aria-live="polite"></div>
 
+    <!-- ===== FOOTNOTE ===== -->
+    <p class="footnote">
+        Data: NYC Taxi &amp; Limousine Commission Trip Record Data. Source code and preprocessing scripts are
+        in our project repository; see <code>DATA_README.md</code> for full data-pipeline documentation.
+    </p>
+
+    <h2>Proposal</h2>
+
+    <p>
+        This project explores how transportation activity changes throughout the day in New York City.
+        We plan to build an interactive, animated map that shows taxi and ride-sharing pickup density over a 24 hour
+        period,
+        allowing users to move through the day and directly compare patterns between weekdays and weekends (either
+        through a continuous 48-hour view or toggle).
+        In addition, users will be able to jump to key moments in the day, such as lunch or evening rush hour, to see
+        how the activity shifts at different points. The goal of this main visualization is to give a clear sense of how
+        the city “moves”
+        throughout the day in a way that isn't obvious from raw data.</p>
+    <p>
+        To support this map, we'll include a couple of supporting charts to show broader trends. A layered bar chart
+        will show the shares of trips taken by different vehicle types (yellow taxis, green taxis, and for-hire vehicles
+        like Uber/Lyft),
+        allowing users to compare how the market share has changed over time, notably since Uber's founding in 2009. We
+        will also create a heatmap with hour of the day on the x-axis and day of the week on the y-axis, where color
+        represents trip volume.
+        This will help us highlight recurring patterns such as weekday commuting behavior versus weekend nightlife
+        activity.
+    </p>
+
     <h2>Dataset</h2>
 
     <p>
-        We will use trip data from the NYC Taxi and Limousine Commission (TLC Trip Record Data). This dataset includes detailed information on taxi and for-hire vehicle trips in New York City, such as pickup time, location, and type of vehicle. 
-        The dataset is large and fairly complex, with millions of trips recorded each month over multiple years. Since each trip has many details, we need to aggregate the data to make it readable and meaningful. It also becomes more complex when comparing different vehicle types and looking at changes over time, especially before and after the congestion pricing policy. These factors make this dataset a good fit for an interactive visualization that can help reveal patterns that wouldn’t be obvious in raw data.
+        We will use trip data from the NYC Taxi and Limousine Commission (TLC Trip Record Data). This dataset includes
+        detailed information on taxi and for-hire vehicle trips in New York City, such as pickup time, location, and
+        type of vehicle.
+        The dataset is large and fairly complex, with millions of trips recorded each month over multiple years. Since
+        each trip has many details, we need to aggregate the data to make it readable and meaningful. It also becomes
+        more complex when comparing different vehicle types and looking at changes over time, especially before and
+        after the congestion pricing policy. These factors make this dataset a good fit for an interactive visualization
+        that can help reveal patterns that wouldn’t be obvious in raw data.
 
     </p>
-        
+
     <!-- Load all the necessary libraries and our script -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="js/script.js"></script>
@@ -63,6 +487,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@6"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-    
+
 </body>
+
 </html>
