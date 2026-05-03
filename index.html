@@ -354,17 +354,18 @@
     </div>
 
     <!-- ===== DATASET ===== -->
-    <h2>The dataset</h2>
+    <h2>Dataset</h2>
 
     <p>
-        All of our data comes from the
-        <a href="https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page">NYC TLC Trip Record Data</a>
-        archive, published as monthly Parquet files. The archive is enormous &mdash; tens of millions of trips
-        per month at peak &mdash; so we never load it directly into the browser. Instead, our preprocessing
-        pipeline (DuckDB + Python) reads the raw files, filters and aggregates them at the right granularity
-        for each visualization, and writes a small CSV or JSON that the page actually loads. Full schema
-        contracts and the methodology for the trickier HVFHV-vs-FHV split live in <code>DATA_README.md</code>
-        in the repo.
+        We will use trip data from the NYC Taxi and Limousine Commission (TLC Trip Record Data). This dataset includes
+        detailed information on taxi and for-hire vehicle trips in New York City, such as pickup time, location, and
+        type of vehicle.
+        The dataset is large and fairly complex, with millions of trips recorded each month over multiple years. Since
+        each trip has many details, we need to aggregate the data to make it readable and meaningful. It also becomes
+        more complex when comparing different vehicle types and looking at changes over time, especially before and
+        after the congestion pricing policy. These factors make this dataset a good fit for an interactive visualization
+        that can help reveal patterns that wouldn’t be obvious in raw data.
+
     </p>
 
     <!-- ===== DESIGN DECISIONS ===== -->
@@ -463,20 +464,6 @@
     <p class="footnote">
         Data: NYC Taxi &amp; Limousine Commission Trip Record Data. Source code and preprocessing scripts are
         in our project repository; see <code>DATA_README.md</code> for full data-pipeline documentation.
-    </p>
-
-    <h2>Dataset</h2>
-
-    <p>
-        We will use trip data from the NYC Taxi and Limousine Commission (TLC Trip Record Data). This dataset includes
-        detailed information on taxi and for-hire vehicle trips in New York City, such as pickup time, location, and
-        type of vehicle.
-        The dataset is large and fairly complex, with millions of trips recorded each month over multiple years. Since
-        each trip has many details, we need to aggregate the data to make it readable and meaningful. It also becomes
-        more complex when comparing different vehicle types and looking at changes over time, especially before and
-        after the congestion pricing policy. These factors make this dataset a good fit for an interactive visualization
-        that can help reveal patterns that wouldn’t be obvious in raw data.
-
     </p>
 
     <!-- Load all the necessary libraries and our script -->
