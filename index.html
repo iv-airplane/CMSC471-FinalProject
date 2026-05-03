@@ -20,7 +20,7 @@
          throughout the day in a way that isn't obvious from raw data.</p>
     <p>
         To support this map, we'll include a couple of supporting charts to show broader trends. A layered bar chart will show the shares of trips taken by different vehicle types (yellow taxis, green taxis, and for-hire vehicles like Uber/Lyft), 
-        allowing users to compare how the market share has changed over time, notably since Uber's founding in 2009. We will also create a heatmap with hour of the day on the x-axis and day of the week on the y-axis, where color represents trip volume. 
+        allowing users to compare how the market share has changed over time, notably since Uber's introduction in NYC in 2011. We will also create a heatmap with hour of the day on the x-axis and day of the week on the y-axis, where color represents trip volume. 
         This will help us highlight recurring patterns such as weekday commuting behavior versus weekend nightlife activity. 
     </p>
 
@@ -31,6 +31,33 @@
     <h2>Ivan's visualization: Market share throught the years</h2>
     <!-- Ivan's visualization -->
     <div id="vis3"></div> 
+
+    <!-- Visualization writeup -->
+    <p>
+        Taxi types/licenses explained:
+        <ul>
+            <li>Yellow is the iconic street hail NYC taxi that operate in all 5 boroughs and require a medallion to operate.</li>
+            <li>Green was introduced in 2013 as a competior to Yellow to help server under-represented neighbourhoods. They don't need a medallion
+                and can pickup anywhere but some parts of Manhattan and the airports. </li>
+            <li>FHVHV covers app-based rideshare platforms operating at high volume in NYC (Uber, Lyft, Via, etc.). </li>
+            <li>FHV data covers black cars, limousines, and app-based dispatch services (e.g. Uber, Lyft).  </li>
+        </ul>
+
+        Note: Even though 2011 - 2014 period is of interest the visualization omits them because FHV data for that period was of poor quality and hence 
+        ommited.
+    </p>
+
+    <h3>Some visualziation insights</h3>
+
+    <p>
+        When Uber was introduced, it took the market by storm and in the first year decreased the market share of a 
+        Yellow taxi by 19%. Green taxi never took off and their market share have been continuously squished by the FHVHV 
+        since at least 2015. In fact, their share have been growing continuously before stabilizing at 2020 at about 79-80%.
+    </p>
+
+    <p>
+        When COVID-19 happened the taxi traffic was halved and it never recovered back to pre-pandemic levels.
+    </p>
 
     <h2>Dwarakesh's Visualization: Heat map</h2>
     <!-- Dwarakesh's Visualization -->
