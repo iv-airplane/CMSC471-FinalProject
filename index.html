@@ -213,6 +213,29 @@
     <h1>City in Motion: Visualizing Taxi Pickups and Urban Flow in New York City</h1>
     <p class="byline">CMSC 471 Final Project &middot; Aadarsh, Dwarakesh, Emily, Ivan, Ryley</p>
 
+    <h2>Proposal</h2>
+
+    <p>
+        This project explores how transportation activity changes throughout the day in New York City.
+        We plan to build an interactive, animated map that shows taxi and ride-sharing pickup density over a 24 hour
+        period,
+        allowing users to move through the day and directly compare patterns between weekdays and weekends (either
+        through a continuous 48-hour view or toggle).
+        In addition, users will be able to jump to key moments in the day, such as lunch or evening rush hour, to see
+        how the activity shifts at different points. The goal of this main visualization is to give a clear sense of how
+        the city “moves”
+        throughout the day in a way that isn't obvious from raw data.</p>
+    <p>
+        To support this map, we'll include a couple of supporting charts to show broader trends. A layered bar chart
+        will show the shares of trips taken by different vehicle types (yellow taxis, green taxis, and for-hire vehicles
+        like Uber/Lyft),
+        allowing users to compare how the market share has changed over time, notably since Uber's founding in 2009. We
+        will also create a heatmap with hour of the day on the x-axis and day of the week on the y-axis, where color
+        represents trip volume.
+        This will help us highlight recurring patterns such as weekday commuting behavior versus weekend nightlife
+        activity.
+    </p>
+
     <!-- ===== INTRODUCTION ===== -->
     <h2>Introduction</h2>
 
@@ -408,16 +431,7 @@
     </p>
     <div id="vis2"></div>
 
-    <h3>2. A decade of market share &mdash; stacked bars and donut (Ivan)</h3>
-    <p class="viz-lead">
-        Each year from the start of the modern dataset to the most recent complete year, broken down by the
-        four vehicle categories. The donut on top shows a single selected year in detail; the stacked bars
-        below show the full sweep, including the 2020 COVID collapse and the steady erosion of yellow-cab
-        share by HVFHV.
-    </p>
-    <div id="vis3"></div>
-
-    <h3>3. The pulse of a week &mdash; hour &times; day-of-week heatmap (Dwarakesh)</h3>
+    <h3>2. The pulse of a week &mdash; hour &times; day-of-week heatmap (Dwarakesh)</h3>
     <p class="viz-lead">
         Every cell is one (day-of-week, hour) bucket aggregated across an entire month. Use the dropdown to
         switch which vehicle type is shown. Compare yellow cabs (heaviest in weekday business hours) to HVFHV
@@ -436,33 +450,19 @@
     </div>
     <div id="vis4-tooltip" role="status" aria-live="polite"></div>
 
+    <h3>3. A decade of market share &mdash; stacked bars and donut (Ivan)</h3>
+    <p class="viz-lead">
+        Each year from the start of the modern dataset to the most recent complete year, broken down by the
+        four vehicle categories. The donut on top shows a single selected year in detail; the stacked bars
+        below show the full sweep, including the 2020 COVID collapse and the steady erosion of yellow-cab
+        share by HVFHV.
+    </p>
+    <div id="vis3"></div>
+
     <!-- ===== FOOTNOTE ===== -->
     <p class="footnote">
         Data: NYC Taxi &amp; Limousine Commission Trip Record Data. Source code and preprocessing scripts are
         in our project repository; see <code>DATA_README.md</code> for full data-pipeline documentation.
-    </p>
-
-    <h2>Proposal</h2>
-
-    <p>
-        This project explores how transportation activity changes throughout the day in New York City.
-        We plan to build an interactive, animated map that shows taxi and ride-sharing pickup density over a 24 hour
-        period,
-        allowing users to move through the day and directly compare patterns between weekdays and weekends (either
-        through a continuous 48-hour view or toggle).
-        In addition, users will be able to jump to key moments in the day, such as lunch or evening rush hour, to see
-        how the activity shifts at different points. The goal of this main visualization is to give a clear sense of how
-        the city “moves”
-        throughout the day in a way that isn't obvious from raw data.</p>
-    <p>
-        To support this map, we'll include a couple of supporting charts to show broader trends. A layered bar chart
-        will show the shares of trips taken by different vehicle types (yellow taxis, green taxis, and for-hire vehicles
-        like Uber/Lyft),
-        allowing users to compare how the market share has changed over time, notably since Uber's founding in 2009. We
-        will also create a heatmap with hour of the day on the x-axis and day of the week on the y-axis, where color
-        represents trip volume.
-        This will help us highlight recurring patterns such as weekday commuting behavior versus weekend nightlife
-        activity.
     </p>
 
     <h2>Dataset</h2>
