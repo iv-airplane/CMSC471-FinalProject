@@ -101,7 +101,7 @@
 
 
         <!-- Ryley's Visualization -->
-        <section>
+        <section class = "hero-viz-section">
             <h2>Choropleth Map: Where do taxi trips happen?</h2>
             <p>
                 This map shows taxi and for-hire vehicle pickups across NYC taxi zones for a single day.
@@ -109,35 +109,48 @@
                 indicating higher activity. Use the slider or play button to move through the day and switch
                 between vehicle types to compare patterns.
             </p>
+
             <div id="vis2"></div> 
         </section>
 
         
 
         <!-- Dwarakesh's Visualization -->
-        <section class = "viz-section">
+        <section class = "viz-section supporting-viz-section">
             <h2>Heat Map: When do taxi trips happen?</h2>
             <p>
                 This heatmap shows trip volume by hour of day and day of week. Each cell represents a specific
                 time period, with darker colors indicating higher activity. Use the dropdown to compare patterns
                 across vehicle types.
             </p>
-        <div id="vis4">
+       <div id="vis4">
             <div class="vis4-app">
-                <h3 id="vis4-title">City Wake Up: Total Trips by Hour and Day of Week</h3>
-                <p class="vis4-sub" id="vis4-subtitle"></p>
-                <div class="vis4-controls">
-                    <label for="vis4-taxi-type">Taxi type</label>
-                    <select id="vis4-taxi-type" aria-label="Taxi type"></select>
+
+                <!-- 2015 heatmap -->
+                <div class="heatmap-instance">
+                    <h2 id="vis4-title-2015"></h2>
+                    <p id="vis4-subtitle-2015"></p>
+                    <select id="vis4-taxi-type-2015"></select>
+                    <div id="vis4-chart-wrap-2015"></div>
+                    <div id="vis4-tooltip-2015" class="tooltip" role="status" aria-live="polite"></div>
                 </div>
-                <div id="vis4-chart-wrap"></div>
+
+                <!-- 2025 heatmap -->
+                <div class="heatmap-instance">
+                    <h2 id="vis4-title-2025"></h2>
+                    <p id="vis4-subtitle-2025"></p>
+                    <select id="vis4-taxi-type-2025"></select>
+                    <div id="vis4-chart-wrap-2025"></div>
+                    <div id="vis4-tooltip-2025" class="tooltip" role="status" aria-live="polite"></div>
+                </div>
+
             </div>
         </div>
-        <div id="vis4-tooltip" role="status" aria-live="polite"></div>
+        
         </section>
 
         <!-- Ivan's visualization -->
-        <section class = "viz-section">
+        <section class = "viz-section supporting-viz-section">
             <h2>Market Share Chart: How have taxi trips evolved over time?</h2>
             <p>
                 This chart shows how the share of trips by vehicle type has changed over time. The stacked bars

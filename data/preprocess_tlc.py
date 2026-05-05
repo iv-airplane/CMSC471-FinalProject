@@ -1,5 +1,5 @@
 import pandas as pd
-import duckdb
+import duckdb, json
 from pathlib import Path
 
 RAW_DIR = Path("data/raw")
@@ -100,12 +100,26 @@ def build_zone_hourly(selected_date=SELECTED_DATE):
         )
         parts.append(hvfhv)
 
+    if file_exists_in_folder("fhv"):
+        other_fhv = safe_duckdb_query(
+            zone_hourly_query(
+                parquet_glob("fhv"),
+                "pickup_datetime",
+                "PUlocationID",
+                "SR_Flag",   # placeholder price col; FHV does not really have fare
+                "other_fhv",
+                selected_date
+            )
+        )
+        other_fhv["trip_price"] = None
+        parts.append(other_fhv)
+
     if not parts:
         raise ValueError("No trip data found for zone_hourly.csv")
 
     grouped = pd.concat(parts, ignore_index=True)
 
-    zones_path = RAW_DIR / "zones" / "taxi_zone_lookup.csv"
+    zones_path = Path("data/zones") / "taxi_zone_lookup.csv"
     zones = pd.read_csv(zones_path)
 
     zones = zones.rename(columns={
@@ -118,7 +132,7 @@ def build_zone_hourly(selected_date=SELECTED_DATE):
     # Ensure every zone/hour/vehicle type exists, even if trip_count = 0
     all_zone_ids = zones["zone_id"].unique()
     all_hours = range(24)
-    all_vehicle_types = ["yellow", "green", "hvfhv"]
+    all_vehicle_types = ["yellow", "green", "hvfhv", "other_fhv"]
 
     full_index = pd.MultiIndex.from_product(
         [all_zone_ids, [selected_date], all_hours, all_vehicle_types],
@@ -377,7 +391,7 @@ def validate_zone_hourly():
 
     assert required_cols.issubset(df.columns), "Missing required columns"
 
-    allowed_types = {"yellow", "green", "hvfhv"}
+    allowed_types = {"yellow", "green", "hvfhv","other_fhv"}
     assert set(df["vehicle_type"].unique()) <= allowed_types, "Invalid vehicle_type"
 
     assert df["pickup_hour"].between(0, 23).all(), "pickup_hour must be 0–23"
@@ -423,6 +437,110 @@ def validate_yearly_market_share():
 
     print("yearly_market_share.csv passed validation")
 
+# ============================================================
+# Output 3: heatmap_data.json
+# Hour x day heatmap
+# ============================================================
+
+HEATMAP_TYPE_SPECS = {
+    "yellow": ("yellow", "tpep_pickup_datetime"),
+    "green": ("green", "lpep_pickup_datetime"),
+    "hvfhv": ("hvfhv", "pickup_datetime"),
+    "fhv": ("other_fhv", "pickup_datetime"),
+}
+
+
+def full_grid(rows):
+    m = {}
+    for hr, dow, cnt in rows:
+        m[(int(hr), int(dow))] = int(cnt)
+
+    cells = []
+    for dow in range(1, 8):
+        for hour in range(24):
+            cells.append({
+                "dow": dow,
+                "hour": hour,
+                "count": m.get((hour, dow), 0)
+            })
+
+    return cells
+
+
+def build_heatmap_grid(folder_name, pickup_col, month="2024-10"):
+    path = parquet_glob(folder_name)
+
+    query = f"""
+    SELECT
+        CAST(HOUR({pickup_col}) AS INTEGER) AS hr,
+        CAST(DATE_PART('isodow', {pickup_col}) AS INTEGER) AS dow,
+        COUNT(*) AS cnt
+    FROM read_parquet('{path}')
+    WHERE {pickup_col} IS NOT NULL
+      AND STRFTIME({pickup_col}, '%Y-%m') = '{month}'
+    GROUP BY hr, dow
+    """
+
+    df = safe_duckdb_query(query)
+
+    if df.empty:
+        return full_grid([])
+
+    rows = list(df[["hr", "dow", "cnt"]].itertuples(index=False, name=None))
+    return full_grid(rows)
+
+
+def sum_cell_grids(grids):
+    if not grids:
+        return full_grid([])
+
+    out = []
+
+    for i in range(len(grids[0])):
+        dow = grids[0][i]["dow"]
+        hour = grids[0][i]["hour"]
+        total = sum(int(g[i]["count"]) for g in grids)
+
+        out.append({
+            "dow": dow,
+            "hour": hour,
+            "count": total
+        })
+
+    return out
+
+
+def build_heatmap_data(month="2024-10", month_label="Oct 2024"):
+    per_type = {}
+
+    for folder_name, (label, pickup_col) in HEATMAP_TYPE_SPECS.items():
+        if file_exists_in_folder(folder_name):
+            per_type[label] = {
+                "cells": build_heatmap_grid(folder_name, pickup_col, month)
+            }
+
+    if not per_type:
+        raise ValueError("No trip data found for heatmap_data.json")
+
+    all_cells = sum_cell_grids([
+        per_type[label]["cells"]
+        for label in per_type
+    ])
+
+    output = {
+        "monthLabel": month_label,
+        "types": {
+            "all": {
+                "cells": all_cells
+            },
+            **per_type
+        }
+    }
+
+    output_path = PROCESSED_DIR / "heatmap_data.json"
+    output_path.write_text(json.dumps(output, indent=2), encoding="utf-8")
+
+    print(f"Saved {output_path}")
 
 # ============================================================
 # Main
@@ -437,3 +555,5 @@ if __name__ == "__main__":
         end_year=END_YEAR
     )
     validate_yearly_market_share()
+
+    build_heatmap_data(month="2015-10", month_label="Oct 2015")

@@ -3,6 +3,7 @@
     font-family: Arial, sans-serif;
     /* max-width: 800px; */
     /* margin: 0px auto; */
+    
     line-height: 1.8;
 }
 
@@ -14,8 +15,8 @@
 }
 
 #vis2 svg {
-    margin: 2rem 0;
-    border: 1px solid #ccc; /*otherwise you can't see this part*/
+    max-width: 100%;
+    height: auto;
 }
 
 #vis2 .vis2-controls {
@@ -169,15 +170,21 @@
     box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.35);
 }
 
+#vis3 {
+    max-width: 760px;
+    margin: 0 auto;
+    overflow-x: auto;
+}
+
 #vis3 svg {
-    margin: 2rem 0;
-    border: 1px solid #ccc; /*otherwise you can't see this part*/
+    max-width: 100%;
+    height: auto;
 }
 
 
 /* Vis4 heatmap (scoped; chart wider than 800px body column) */
 #vis4 {
-    max-width: 1100px;
+    max-width: 760px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -335,9 +342,13 @@ p {
 }
 body {
     background: #f0f4ff;
-    max-width: 900px;
-    margin: 0 auto;
+    margin: 0;
     padding: 20px;
+}
+
+main {
+    max-width: 1180px;
+    margin: 0 auto;
 }
 
 h1 {
@@ -389,7 +400,22 @@ section {
     padding: 1.75rem 2rem;
     margin-bottom: 1.5rem;
     border: 1px solid #e2e8f0;
-    max-width: 800px;
+}
+
+.dataset-section,
+.implementation-section,
+.sources-section {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-viz-section {
+    max-width: 1180px;
+}
+
+.supporting-viz-section {
+    max-width: 900px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -469,4 +495,146 @@ a:hover {
 .emphasis {
     font-weight: 600;
     color: #c19068;   /* accent color (orange) */
+}
+
+.vis2-toggle {
+  display: inline-flex;
+  background: #f1f3f5;
+  border: 1px solid #d0d7de;
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.vis2-toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vis2-toggle-btn:hover {
+  color: #111;
+}
+
+.vis2-toggle-btn.active {
+  background: white;
+  color: #111;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+}
+.vis2-zoom-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vis2-zoom-btn {
+  border: 1px solid #d0d7de;
+  background: white;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vis2-zoom-btn:hover {
+  background: #f1f3f5;
+}
+
+#vis2 {
+  position: relative;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.vis2-map-overlay {
+  position: absolute;
+  top: 56px;
+  right: 18px;   
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; 
+  gap: 8px;
+  pointer-events: none;
+}
+
+.vis2-overlay-card {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid #d0d7de;
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+  min-width: 160px; /* 👈 makes it look balanced */
+}
+
+.vis2-zoom-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.vis2-zoom-btn {
+  flex: 1;
+  border: 1px solid #d0d7de;
+  background: white;
+  border-radius: 999px;
+  padding: 6px 0;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vis2-story-card {
+  width: 260px;
+}
+
+.vis2-story-kicker {
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.vis2-story-card h4 {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+}
+
+.vis2-story-card p {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #475569;
+}
+
+.vis2-story-btn {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  background: #111827;
+  color: white;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vis4-app {
+    display: flex;
+    gap: 24px;
+}
+
+.heatmap-instance {
+    flex: 1;
 }

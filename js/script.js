@@ -6,8 +6,8 @@ const colorScale = {
 
 
 const margin = { top: 54, right: 18, bottom: 18, left: 18 };
-const width = 800;
-const height = 520;
+const width = 1000;
+const height = 650;
 const VIS2_DATE = "2024-10-16";
 const VIS2_DEFAULT_VEHICLE = "all";
 function formatHourLabel(hour) {
@@ -46,12 +46,16 @@ const tooltip = d3
   .style("font-size", "12px")
   .style("box-shadow", "0 2px 8px rgba(0,0,0,0.12)");
 
-function createVis(zoneHourly, taxiZonesGeojson) {
+function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
   const state = {
     ...TIME_OPTIONS[0],
-    vehicleType: VIS2_DEFAULT_VEHICLE
+    vehicleType: VIS2_DEFAULT_VEHICLE,
+    viewMode: "zone"
   };
 
+  function getActiveGeojson() {
+    return state.viewMode === "borough" ? boroughsGeojson : taxiZonesGeojson;
+  } 
   let byZone = new Map();
   let fixedMaxVal = 1;
   let currentColorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, 1]);
@@ -97,8 +101,105 @@ function createVis(zoneHourly, taxiZonesGeojson) {
   function formatHourlyTotal(total) {
     return `Total trips this hour: ${d3.format(",")(Math.round(total))}`;
   }
+  const VEHICLE_ORDER = ["yellow", "green", "hvfhv", "other_fhv"];
 
+  const VEHICLE_LABELS = {
+    yellow: "Yellow",
+    green: "Green",
+    hvfhv: "HVFHV",
+    other_fhv: "Other FHV"
+  };
+
+  const VEHICLE_COLORS = {
+    yellow: "#f0a500",
+    green: "#4caf7d",
+    hvfhv: "#3d5a99",
+    other_fhv: "#aaaaaa"
+  };
+
+  function getFeatureKey(f) {
+    if (state.viewMode === "borough") {
+      return getFeatureBorough(f);
+    }
+    return +f.properties.LocationID;
+  }
+
+  function getFeatureName(f) {
+    if (state.viewMode === "borough") {
+      return getFeatureBorough(f) || "Unknown borough";
+    }
+    return f.properties.zone || f.properties.Zone || `Zone ${+f.properties.LocationID}`;
+  }
+
+
+ 
   const vis2Rows = zoneHourly.filter(d => d.pickup_date === VIS2_DATE);
+  function computeByKey(hour, vehicleType) {
+    const filtered = vis2Rows.filter(d => +d.pickup_hour === +hour);
+
+    const rows =
+      vehicleType === "all"
+        ? filtered
+        : filtered.filter(d => d.vehicle_type === vehicleType);
+
+    const keyFn =
+      state.viewMode === "borough"
+        ? d => d.borough
+        : d => +d.zone_id;
+
+    return d3.rollup(
+      rows,
+      rs => d3.sum(rs, r => +r.trip_count),
+      keyFn
+    );
+  }
+
+  function getBreakdownForFeature(f) {
+    const key = getFeatureKey(f);
+
+    const rows = vis2Rows.filter(d => {
+      const sameHour = +d.pickup_hour === +state.hour;
+      const sameKey =
+        state.viewMode === "borough"
+          ? d.borough === key
+          : +d.zone_id === +key;
+
+      return sameHour && sameKey;
+    });
+
+    const counts = d3.rollup(
+      rows,
+      rs => d3.sum(rs, r => +r.trip_count),
+      d => d.vehicle_type
+    );
+
+    const total = d3.sum(VEHICLE_ORDER, v => counts.get(v) || 0);
+
+    return VEHICLE_ORDER.map(v => ({
+      type: v,
+      label: VEHICLE_LABELS[v],
+      count: counts.get(v) || 0,
+      share: total > 0 ? (counts.get(v) || 0) / total : 0
+    }));
+  }
+
+  function breakdownBarHtml(breakdown) {
+    return `
+      <div style="margin-top:8px;">
+        <div style="font-weight:700;margin-bottom:4px;">Vehicle breakdown</div>
+        ${breakdown.map(d => `
+          <div style="display:grid;grid-template-columns:64px 90px 42px;align-items:center;gap:6px;margin:3px 0;">
+            <span>${d.label}</span>
+            <div style="height:8px;background:#eee;border-radius:999px;overflow:hidden;">
+              <div style="height:8px;width:${d.share * 100}%;background:${VEHICLE_COLORS[d.type]};"></div>
+            </div>
+            <span style="text-align:right;">${d3.format(".0%")(d.share)}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+  
 
   const byVehicleHourZone = d3.rollup(
     vis2Rows,
@@ -115,21 +216,17 @@ function createVis(zoneHourly, taxiZonesGeojson) {
     d => +d.zone_id
   );
 
-  function computeByZone(hour, vehicleType) {
-    if (vehicleType === "all") {
-      return byHourZoneAll.get(+hour) ?? new Map();
-    }
-    return byVehicleHourZone.get(vehicleType)?.get(+hour) ?? new Map();
-  }
+function computeByZone(hour, vehicleType) {
+  return computeByKey(hour, vehicleType);
+}
 
   function computeFixedMax(vehicleType) {
-    const byHour =
-      vehicleType === "all"
-        ? byHourZoneAll
-        : byVehicleHourZone.get(vehicleType) ?? new Map();
+    const hours = d3.range(24);
 
-    const maxVal =
-      d3.max(Array.from(byHour.values(), zoneMap => d3.max([...zoneMap.values()]) ?? 0)) ?? 1;
+    const maxVal = d3.max(hours, hour => {
+      const valuesForHour = computeByKey(hour, vehicleType);
+      return d3.max([...valuesForHour.values()]) ?? 0;
+    }) ?? 1;
 
     return Math.max(1, maxVal);
   }
@@ -141,55 +238,96 @@ function createVis(zoneHourly, taxiZonesGeojson) {
     updateLegend(vehicleType);
   }
 
-  const projection = d3.geoIdentity()
-  .reflectY(true)
-  .fitExtent(
-    [
-      [margin.left, margin.top],
-      [width - margin.right, height - margin.bottom - 46]
-    ],
-    taxiZonesGeojson
-  );
+const mapG = svg.append("g");
+const zoom = d3.zoom()
+  .scaleExtent([1, 8])
+  .translateExtent([[0, 0], [width, height]])
+  .on("zoom", event => {
+    mapG.attr("transform", event.transform);
+  });
 
+svg.call(zoom);
+
+let mapPaths;
+let hoveredFeature = null;
+let lastMouseEvent = null;
+function getFeatureBorough(f) {
+    return (
+      f.properties.borough ||
+      f.properties.Borough ||
+      f.properties.boro_name ||
+      f.properties.BoroName ||
+      f.properties.BoroName ||
+      f.properties.name ||
+      f.properties.NAME ||
+      ""
+    );
+  }
+
+function showVis2Tooltip(event, f) {
+  const key = getFeatureKey(f);
+  const name = getFeatureName(f);
+  const borough = getFeatureBorough(f);
+  const v = byZone.get(key);
+  const breakdown = getBreakdownForFeature(f);
+
+  tooltip
+    .style("opacity", 1)
+    .style("left", `${event.pageX + 12}px`)
+    .style("top", `${event.pageY + 12}px`)
+    .html(
+      `<div style="font-weight:700;margin-bottom:4px;">${name}</div>` +
+      (state.viewMode === "zone"
+        ? `<div><b>Zone ID:</b> ${+f.properties.LocationID}</div>`
+        : "") +
+      `<div><b>Borough:</b> ${borough}</div>` +
+      `<div><b>View:</b> ${state.viewMode === "borough" ? "Borough" : "Taxi zone"}</div>` +
+      `<div><b>Time:</b> ${state.label}</div>` +
+      `<div><b>Vehicle:</b> ${getVehicleLabel(state.vehicleType)}</div>` +
+      `<div><b>Trip count:</b> ${
+        Number.isFinite(v) ? d3.format(",")(Math.round(v)) : "No data"
+      }</div>` +
+      breakdownBarHtml(breakdown)
+    );
+}
+function drawMap() {
+  const activeGeojson = getActiveGeojson();
+
+  const projection = d3.geoIdentity()
+    .reflectY(true)
+    .fitExtent(
+      [
+        [margin.left, margin.top],
+        [width - margin.right, height - margin.bottom - 46]
+      ],
+      activeGeojson
+    );
 
   const path = d3.geoPath(projection);
-
-  const mapPaths = svg
-    .append("g")
+  
+  mapPaths = mapG
     .selectAll("path")
-    .data(taxiZonesGeojson.features)
+    .data(activeGeojson.features, f => getFeatureKey(f))
     .join("path")
     .attr("d", path)
     .attr("stroke", "#555")
-    .attr("stroke-width", 0.35)
+    .attr("stroke-width", state.viewMode === "borough" ? 1.1 : 0.35)
     .attr("fill", f => {
-      const zoneId = +f.properties.LocationID;
-      const v = byZone.get(zoneId);
+      const key = getFeatureKey(f);
+      const v = byZone.get(key);
       return Number.isFinite(v) ? currentColorScale(v) : "#f2f2f2";
     })
     .on("mousemove", (event, f) => {
-      const zoneId = +f.properties.LocationID;
-      const zoneName = f.properties.zone || f.properties.Zone || `Zone ${zoneId}`;
-      const borough = f.properties.borough || f.properties.Borough || "";
-      const v = byZone.get(zoneId);
-
-      tooltip
-        .style("opacity", 1)
-        .style("left", `${event.pageX + 12}px`)
-        .style("top", `${event.pageY + 12}px`)
-        .html(
-          `<div style="font-weight:700;margin-bottom:4px;">${zoneName}</div>` +
-            `<div><b>Zone ID:</b> ${zoneId}</div>` +
-            `<div><b>Borough:</b> ${borough}</div>` +
-            `<div><b>Time:</b> ${state.label}</div>` +
-            `<div><b>Vehicle:</b> ${getVehicleLabel(state.vehicleType)}</div>` +
-            `<div><b>Trip count:</b> ${
-              Number.isFinite(v) ? d3.format(",")(Math.round(v)) : "No data"
-            }</div>`
-        );
-    })
-    .on("mouseleave", () => tooltip.style("opacity", 0));
-
+    hoveredFeature = f;
+    lastMouseEvent = event;
+    showVis2Tooltip(event, f);
+  })
+  .on("mouseleave", () => {
+    hoveredFeature = null;
+    lastMouseEvent = null;
+    tooltip.style("opacity", 0);
+  });
+}
   // Legend
   const legendW = 260;
   const legendH = 10;
@@ -310,21 +448,27 @@ function createVis(zoneHourly, taxiZonesGeojson) {
     subtitle.text(formatHourlyTotal(hourlyTotal));
 
     mapPaths
+      .interrupt()
       .transition()
       .duration(250)
       .ease(d3.easeCubicOut)
       .attr("fill", f => {
-        const zoneId = +f.properties.LocationID;
-        const v = byZone.get(zoneId);
+        const key = getFeatureKey(f);
+        const v = byZone.get(key);
         return Number.isFinite(v) ? currentColorScale(v) : "#f2f2f2";
       });
 
     updateLegend(state.vehicleType);
+    if (hoveredFeature && lastMouseEvent) {
+      showVis2Tooltip(lastMouseEvent, hoveredFeature);
+    }
   }
 
   const controls = root.append("div").attr("class", "vis2-controls");
-
+  
   controls.html(`
+
+
     <div class="vis2-controls-section vis2-vehicle-section">
       <label class="vis2-field-label" for="vis2-vehicle-select">Vehicle type</label>
       <select id="vis2-vehicle-select" class="vis2-vehicle-select" aria-label="Vehicle type"></select>
@@ -341,6 +485,28 @@ function createVis(zoneHourly, taxiZonesGeojson) {
       <div class="vis2-time-labels" aria-hidden="true"></div>
     </div>
   `);
+  
+  const mapOverlay = root
+    .append("div")
+    .attr("class", "vis2-map-overlay");
+
+  mapOverlay.html(`
+    <div class="vis2-overlay-card">
+      <span class="vis2-field-label">Map view</span>
+      <div class="vis2-toggle" role="group" aria-label="Map view">
+        <button type="button" class="vis2-toggle-btn active" data-view="zone">Neighborhood</button>
+        <button type="button" class="vis2-toggle-btn" data-view="borough">Borough</button>
+      </div>
+    </div>
+
+    <div class="vis2-overlay-card vis2-zoom-section">
+      <button type="button" class="vis2-zoom-btn vis2-zoom-in">+</button>
+      <button type="button" class="vis2-zoom-btn vis2-zoom-out">−</button>
+      <button type="button" class="vis2-zoom-btn vis2-zoom-reset">Reset</button>
+    </div>
+
+    
+  `);
 
   const sliderTickHours = TIME_OPTIONS.filter(d => d.hour % 3 === 0 || d.hour === 23);
 
@@ -350,7 +516,8 @@ function createVis(zoneHourly, taxiZonesGeojson) {
     .data(sliderTickHours)
     .join("span")
     .text(d => formatHourTickLabel(d.hour));
-
+  
+  
   controls
     .select(".vis2-vehicle-select")
     .selectAll("option")
@@ -371,7 +538,9 @@ function createVis(zoneHourly, taxiZonesGeojson) {
     Object.assign(state, TIME_OPTIONS[i]);
     controls.select(".vis2-time-value").text(state.label);
 
-    title.text(`NYC Pickups by Taxi Zone — ${getVehicleLabel(state.vehicleType)}, ${state.label}`);
+    title.text(
+    `NYC Pickups by ${state.viewMode === "borough" ? "Borough" : "Taxi Zone"} — ${getVehicleLabel(state.vehicleType)}, ${state.label}`
+  );
 
     updateChoropleth();
   }
@@ -401,11 +570,48 @@ function createVis(zoneHourly, taxiZonesGeojson) {
 
   controls.select(".vis2-time-slider").on("input", e => {
     stopPlayDay();
+    stopStory()
     syncHourFromIndex(+e.target.value);
   });
+  
+  
 
+  mapOverlay.selectAll(".vis2-toggle-btn").on("click", function () {
+    stopPlayDay();
+    stopStory();
+
+    state.viewMode = this.dataset.view;
+
+    mapOverlay
+      .selectAll(".vis2-toggle-btn")
+      .classed("active", function () {
+        return this.dataset.view === state.viewMode;
+      });
+
+    title.text(
+      `NYC Pickups by ${
+        state.viewMode === "borough" ? "Borough" : "Taxi Zone"
+      } — ${getVehicleLabel(state.vehicleType)}, ${state.label}`
+    );
+
+    updateColorScale(state.vehicleType);
+    drawMap();
+    updateChoropleth();
+  });
+  mapOverlay.select(".vis2-zoom-in").on("click", () => {
+    svg.transition().duration(250).call(zoom.scaleBy, 1.4);
+  });
+
+  mapOverlay.select(".vis2-zoom-out").on("click", () => {
+    svg.transition().duration(250).call(zoom.scaleBy, 1 / 1.4);
+  });
+
+  mapOverlay.select(".vis2-zoom-reset").on("click", () => {
+    svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity);
+  });
   controls.select(".vis2-vehicle-select").on("change", e => {
     stopPlayDay();
+    stopStory();
     state.vehicleType = e.target.value;
 
     title.text(`NYC Pickups by Taxi Zone — ${getVehicleLabel(state.vehicleType)}, ${state.label}`);
@@ -413,10 +619,13 @@ function createVis(zoneHourly, taxiZonesGeojson) {
     updateColorScale(state.vehicleType);
     updateChoropleth();
   });
+  
 
-  updateColorScale(state.vehicleType);
-  updateChoropleth();
-}
+  
+    updateColorScale(state.vehicleType);
+    drawMap();
+    updateChoropleth();
+  }
 
 
 
@@ -661,13 +870,14 @@ function createStackedBarChart() {
   };
 }
 
-function createVis4(bundle) {
+function createVis4(bundle, chartWrapId, selectId, tooltipId, titleId, subtitleId, globalMax) {
+  console.log("bundle keys:", Object.keys(bundle.types));
   const TYPE_LABELS = {
     all: "All types",
     green: "Green taxi",
     yellow: "Yellow taxi",
-    fhv: "FHV (for-hire)",
-    fhvhv: "FHVHV (high-volume / app)",
+    other_fhv: "FHV (for-hire)",
+    hvfhv: "HVFHV (high-volume / app)",
   };
 
   const margin = { top: 16, right: 220, bottom: 72, left: 120 };
@@ -676,7 +886,7 @@ function createVis4(bundle) {
   const width = margin.left + innerWidth + margin.right;
   const height = margin.top + innerHeight + margin.bottom;
 
-  const wrap = d3.select("#vis4-chart-wrap");
+  const wrap = d3.select("#" + chartWrapId);
   wrap.selectAll("*").remove();
 
   const svg = wrap
@@ -752,7 +962,8 @@ function createVis4(bundle) {
     .attr("class", "legend-wrap")
     .attr("transform", `translate(${margin.left + innerWidth + 16}, ${margin.top})`);
 
-  const tooltip = d3.select("#vis4-tooltip");
+  const tooltip = d3.select("#" + tooltipId);
+
   tooltip.style("opacity", 0);
 
   function showTooltip(html, event) {
@@ -764,7 +975,8 @@ function createVis4(bundle) {
     tooltip.style("opacity", 0);
   }
 
-  const selectEl = d3.select("#vis4-taxi-type");
+  const selectEl = d3.select("#" + selectId);
+
 
   function positionTooltip(event) {
     const pad = 12;
@@ -889,6 +1101,7 @@ function createVis4(bundle) {
 
     const baseDelay = 24; // ms per hour column
     merged
+      .interrupt()
       .transition()
       .delay((d) => (Number(d.hour) || 0) * baseDelay)
       .duration(480)
@@ -899,10 +1112,9 @@ function createVis4(bundle) {
 
   function updateChart(typeKey) {
     const cells = bundle.types[typeKey].cells;
-    const maxC = d3.max(cells, (d) => d.count) || 1;
-    const color = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxC]);
+    const color = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, globalMax]);
     const taxiLabel = TYPE_LABELS[typeKey];
-    drawLegend(maxC, color, typeKey);
+    drawLegend(globalMax, color, typeKey);
     renderCells(cells, color, taxiLabel);
   }
 
@@ -912,8 +1124,8 @@ function createVis4(bundle) {
     return a.localeCompare(b);
   });
   const month = bundle.monthLabel;
-  d3.select("#vis4-title").text("City Wake Up: Total Trips by Hour and Day of Week");
-  d3.select("#vis4-subtitle").text(month ? `(${month})` : "");
+  d3.select("#" + titleId).text("City Wake Up: Total Trips by Hour and Day of Week");
+  d3.select("#" + subtitleId).text(month ? `(${month})` : "");
 
   selectEl.selectAll("option").remove();
   selectEl
@@ -952,6 +1164,7 @@ function init() {
     // });
   Promise.all([
     d3.json("data/zones/taxi_zones.json"),
+    d3.json("data/choropleth/nyc_boroughs.geojson"),
     d3.csv("data/processed/zone_hourly.csv", d => ({
       zone_id: +d.zone_id,
       borough: d.borough,
@@ -967,13 +1180,20 @@ function init() {
         taxi_type: d.taxi_type,
         trip_count: +d.trip_count,
         share: +d.share  })),
-    d3.json("data/processed/heatmap_data.json")
-  ]).then(([boroughsGeojson, zoneHourly, marketShare, heatmapBundle]) => {
-    createVis(zoneHourly, boroughsGeojson);
+    d3.json("data/processed/heatmap_data_2015.json"),  // 2015
+    d3.json("data/processed/heatmap_data_2025.json"),  // 2025
+  ]).then(([taxiZonesGeojson, boroughsGeojson, zoneHourly, marketShare, heatmap2015, heatmap2025]) => {
+    const globalMax = Math.max(
+        ...Object.values(heatmap2015.types).map(t => d3.max(t.cells, d => d.count)),
+        ...Object.values(heatmap2025.types).map(t => d3.max(t.cells, d => d.count))
+    );
+    
+    createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson);
     createVis3(marketShare);
-    createVis4(heatmapBundle);
+    createVis4(heatmap2015, "vis4-chart-wrap-2015", "vis4-taxi-type-2015", "vis4-tooltip-2015", "vis4-title-2015", "vis4-subtitle-2015", globalMax);
+    createVis4(heatmap2025, "vis4-chart-wrap-2025", "vis4-taxi-type-2025", "vis4-tooltip-2025", "vis4-title-2025", "vis4-subtitle-2025", globalMax);
   }).catch(error => {
-        console.error("Error loading project data:", error);
+    console.error("Error loading project data:", error);
   });
 }
 
