@@ -633,6 +633,18 @@ function createStackedBarChart() {
         layer: [
             // Main stacked bars
             {
+              // define the order of categories, place HVFHV at the bottom for clarity
+              transform: [
+                    {
+                      calculate:
+                        "datum.taxi_type == 'hvfhv' ? 0 : " +
+                        "datum.taxi_type == 'other_fhv' ? 1 : " +
+                        "datum.taxi_type == 'green' ? 2 : " +
+                        "datum.taxi_type == 'yellow' ? 3 : 4",
+                      as: "stack_order"
+                    }
+                  ],
+
                 mark: {
                     type: "bar",
                     size: 18
@@ -678,8 +690,17 @@ function createStackedBarChart() {
                         field: "taxi_type",
                         type: "nominal",
                         scale: colorScale,
-                        legend: null
+                        legend: null,
                     },
+
+                    // order layers using our custom ""
+                    order: {
+                        field: "stack_order",
+                        type: "quantitative",
+                        sort: "ascending"
+                    },
+
+
                     // Highlight the selected bar
                     opacity: {
                         condition: { param: "yearSelection", value: 1 },
