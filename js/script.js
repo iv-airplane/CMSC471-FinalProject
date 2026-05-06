@@ -458,8 +458,9 @@ function createVis3(data) {
         ]
     };
 
-    // Embed the chart in the HTML file
-    vegaEmbed('#vis3', marketShareChartSpec);
+    // Embed the chart in the HTML file,
+    // set actions = false, to remove the menu / Vega-lite source artifcat
+    vegaEmbed('#vis3', marketShareChartSpec, {actions: false});
 }
 
 
@@ -569,7 +570,8 @@ function createLegendChart() {
                         scale: colorScale,
                         legend: null
                     },
-                    x: { value: 10 }
+                    // move color squares further from the border 
+                    x: { value: 30 }
                 }
             },
             // Labels for taxis (Uber, Yellow cab...)
