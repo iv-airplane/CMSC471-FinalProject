@@ -21,14 +21,17 @@
             </p>
             <div class="divider"></div>
             <p class="project-intro">
-                New York City’s transportation system is constantly in motion, shaped by 
-                <span class="emphasis">where</span> people go,
-                <span class="emphasis">when</span> they travel, and 
-                <span class="emphasis">how</span> 
-                they choose to get around. This project uses NYC Taxi and Limousine Commission
-                (TLC) data to explore taxi and ride-hailing activity across the city. Through interactive
-                visualizations, explore where trips are concentrated, how demand shifts,
-                and how transportation modes have evolved over time.
+                Over the past decade, transportation in New York City has undergone a major transformation. 
+                Traditional taxis once dominated the system, but the rapid growth of ride-hailing services 
+                has reshaped how people move throughout the city.
+
+                This shift has changed <span class="emphasis">when</span> people travel, moving away from 
+                predictable commuting patterns toward a more flexible, on-demand system. While these changes 
+                are most visible over time, they are also reflected in how activity is distributed across the city today.
+
+                This project explores that transformation by examining how the composition of trips has changed, 
+                how travel behavior has evolved over time, and what today’s transportation patterns look like 
+                across different parts of the city.
             </p>
         </header>
 
@@ -100,65 +103,111 @@
 
 
 
-        <!-- Ryley's Visualization -->
-        <section class = "hero-viz-section">
-            <h2>Choropleth Map: Where do taxi trips happen?</h2>
-            <p>
-                This map shows taxi and for-hire vehicle pickups across NYC taxi zones for a single day.
-                Each zone is colored based on the number of trips during a selected hour, with darker colors
-                indicating higher activity. Use the slider or play button to move through the day and switch
-                between vehicle types to compare patterns.
-            </p>
-
-            <div id="vis2"></div> 
-        </section>
-
-        
-
         <!-- Dwarakesh's Visualization -->
         <section class = "viz-section supporting-viz-section">
-            <h2>Heat Map: When do taxi trips happen?</h2>
+            <h2>How did travel behavior change?</h2>
             <p>
-                This heatmap shows trip volume by hour of day and day of week. Each cell represents a specific
-                time period, with darker colors indicating higher activity. Use the dropdown to compare patterns
-                across vehicle types.
+                As ride-hailing became more prominent, travel patterns also began to shift. 
+                In 2015, trips were concentrated around traditional commuting hours, with clear peaks 
+                in the morning and evening.
+
+                By 2025, travel is more evenly distributed throughout the day, with increased activity 
+                during midday, evenings, and weekends. This suggests a move away from rigid commuting 
+                toward more flexible, on-demand travel.
             </p>
-       <div id="vis4">
-            <div class="vis4-app">
-
-                <!-- 2015 heatmap -->
-                <div class="heatmap-instance">
-                    <h2 id="vis4-title-2015"></h2>
-                    <p id="vis4-subtitle-2015"></p>
-                    <select id="vis4-taxi-type-2015"></select>
-                    <div id="vis4-chart-wrap-2015"></div>
-                    <div id="vis4-tooltip-2015" class="tooltip" role="status" aria-live="polite"></div>
-                </div>
-
-                <!-- 2025 heatmap -->
-                <div class="heatmap-instance">
-                    <h2 id="vis4-title-2025"></h2>
-                    <p id="vis4-subtitle-2025"></p>
-                    <select id="vis4-taxi-type-2025"></select>
-                    <div id="vis4-chart-wrap-2025"></div>
-                    <div id="vis4-tooltip-2025" class="tooltip" role="status" aria-live="polite"></div>
-                </div>
-
-            </div>
-        </div>
-        
+            <div id="vis3"></div>
         </section>
+
+        <section id="vis5-section supporting-viz-section">
+            <h2>Where did these changes occur?</h2>
+            <p>
+                This difference heatmap highlights how travel patterns have evolved over time. 
+                Blue areas represent declines since 2015, while red areas indicate growth.
+
+                We observe decreases in traditional weekday commuting periods, alongside increases in 
+                evening and weekend activity. These changes reflect a shift toward more flexible travel 
+                behavior enabled by ride-hailing platforms.
+            </p>
+            
+            <div id="vis4">
+                <div class="vis4-app">
+
+                    <!-- 2015 heatmap -->
+                    <div class="heatmap-instance">
+                        <h2 id="vis4-title-2015"></h2>
+                        <p id="vis4-subtitle-2015"></p>
+                        <select id="vis4-taxi-type-2015"></select>
+                        <div id="vis4-chart-wrap-2015"></div>
+                        <div id="vis4-tooltip-2015" class="tooltip" role="status" aria-live="polite"></div>
+                    </div>
+
+                    <!-- 2025 heatmap -->
+                    <div class="heatmap-instance">
+                        <h2 id="vis4-title-2025"></h2>
+                        <p id="vis4-subtitle-2025"></p>
+                        <select id="vis4-taxi-type-2025"></select>
+                        <div id="vis4-chart-wrap-2025"></div>
+                        <div id="vis4-tooltip-2025" class="tooltip" role="status" aria-live="polite"></div>
+                    </div>
+
+                </div>
+            </div>
+            
+            </section>
+        
+        
+            
+
+        
+
+        
 
         <!-- Ivan's visualization -->
         <section class = "viz-section supporting-viz-section">
-            <h2>Market Share Chart: How have taxi trips evolved over time?</h2>
+            <h2>Deeper Dive: Where did these changes occur?</h2>
             <p>
-                This chart shows how the share of trips by vehicle type has changed over time. The stacked bars
-                display the proportion of total trips each year, while the donut chart highlights the breakdown
-                for a selected year.
+               This difference heatmap highlights how travel patterns have evolved over time. 
+                Blue areas represent declines since 2015, while red areas indicate growth.
+
+                We observe decreases in traditional weekday commuting periods, alongside increases in 
+                evening and weekend activity. These changes reflect a shift toward more flexible travel 
+                behavior enabled by ride-hailing platforms.
             </p>
-            <div id="vis3"></div> 
+            
+            <div id="vis5"></div>
         </section>
+
+        </section>
+
+
+         <!-- Ryley's Visualization -->
+        <section class = "hero-viz-section">
+            <h2>How does the city move today?</h2>
+            <p>
+                Today’s transportation system reflects these changes in behavior across both space and time. 
+                This map allows you to explore how trip activity varies throughout the day, at both the 
+                <span class="emphasis">borough level</span> and the more detailed 
+                <span class="emphasis">neighborhood (taxi zone) level</span>.
+
+                At the borough level, we can observe broad patterns — such as Manhattan’s concentration of 
+                daytime activity and the stronger evening demand in outer boroughs like Brooklyn and Queens. 
+                Switching to the neighborhood view reveals finer-grained differences, highlighting specific 
+                areas where demand is especially high or changes rapidly over time.
+            </p>
+
+            <p>
+                Together, these views show that travel patterns are not uniform across the city. 
+                Instead, demand varies significantly depending on both location and time of day, reflecting 
+                a more flexible and distributed transportation system.
+            </p>
+
+            <p class="mini-note">
+                For ride-hailing platforms and taxi operators, understanding demand at both the borough and 
+                neighborhood level is critical for decisions such as driver allocation, pricing, and service coverage.
+            </p>
+            <div id="vis2"></div> 
+        </section>
+
 
 
         <section class = "implementation-section">

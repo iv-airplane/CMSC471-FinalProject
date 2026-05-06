@@ -46,11 +46,13 @@ const tooltip = d3
   .style("font-size", "12px")
   .style("box-shadow", "0 2px 8px rgba(0,0,0,0.12)");
 
+
+
 function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
   const state = {
     ...TIME_OPTIONS[0],
     vehicleType: VIS2_DEFAULT_VEHICLE,
-    viewMode: "zone"
+    viewMode: "borough"
   };
 
   function getActiveGeojson() {
@@ -60,6 +62,8 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
   let fixedMaxVal = 1;
   let currentColorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, 1]);
 
+  let selectedFeature = null;
+  let selectedKey = null;
   const visRootNode = root.node();
   if (visRootNode.__vis2PlayDayTimer) {
     clearInterval(visRootNode.__vis2PlayDayTimer);
@@ -68,6 +72,7 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
 
   svg.selectAll("*").remove();
   root.selectAll(".vis2-controls").remove();
+  root.selectAll(".vis2-map-overlay").remove();
 
   const vehicleTypes = Array.from(new Set(zoneHourly.map(d => d.vehicle_type))).sort((a, b) =>
     a.localeCompare(b)
@@ -249,6 +254,7 @@ const zoom = d3.zoom()
 svg.call(zoom);
 
 let mapPaths;
+let mapLabels;
 let hoveredFeature = null;
 let lastMouseEvent = null;
 function getFeatureBorough(f) {
@@ -263,7 +269,13 @@ function getFeatureBorough(f) {
       ""
     );
   }
+function resetInfoCard() {
+  selectedFeature = null;
+  selectedKey = null;
 
+  mapOverlay.select(".vis2-info-title").text("Click an area");
+  mapOverlay.select(".vis2-info-body").text("Trip details will appear here.");
+}
 function showVis2Tooltip(event, f) {
   const key = getFeatureKey(f);
   const name = getFeatureName(f);
@@ -271,28 +283,33 @@ function showVis2Tooltip(event, f) {
   const v = byZone.get(key);
   const breakdown = getBreakdownForFeature(f);
 
-  tooltip
-    .style("opacity", 1)
-    .style("left", `${event.pageX + 12}px`)
-    .style("top", `${event.pageY + 12}px`)
-    .html(
-      `<div style="font-weight:700;margin-bottom:4px;">${name}</div>` +
-      (state.viewMode === "zone"
-        ? `<div><b>Zone ID:</b> ${+f.properties.LocationID}</div>`
-        : "") +
-      `<div><b>Borough:</b> ${borough}</div>` +
-      `<div><b>View:</b> ${state.viewMode === "borough" ? "Borough" : "Taxi zone"}</div>` +
-      `<div><b>Time:</b> ${state.label}</div>` +
-      `<div><b>Vehicle:</b> ${getVehicleLabel(state.vehicleType)}</div>` +
-      `<div><b>Trip count:</b> ${
-        Number.isFinite(v) ? d3.format(",")(Math.round(v)) : "No data"
-      }</div>` +
-      breakdownBarHtml(breakdown)
-    );
+  mapOverlay.select(".vis2-info-title").html(name);
+
+  mapOverlay.select(".vis2-info-body").html(
+    (state.viewMode === "zone"
+      ? `<div><b>Zone ID:</b> ${+f.properties.LocationID}</div>`
+      : "") +
+    `<div><b>Borough:</b> ${borough}</div>` +
+    `<div><b>View:</b> ${state.viewMode === "borough" ? "Borough" : "Taxi zone"}</div>` +
+    `<div><b>Time:</b> ${state.label}</div>` +
+    `<div><b>Vehicle:</b> ${getVehicleLabel(state.vehicleType)}</div>` +
+    `<div><b>Trip count:</b> ${
+      Number.isFinite(v) ? d3.format(",")(Math.round(v)) : "No data"
+    }</div>` +
+    breakdownBarHtml(breakdown)
+  );
 }
 function drawMap() {
   const activeGeojson = getActiveGeojson();
 
+  if (!activeGeojson || !activeGeojson.features || activeGeojson.features.length === 0) {
+    console.error("Missing or invalid GeoJSON for", state.viewMode, activeGeojson);
+    return;
+  }
+  console.log("taxiZonesGeojson", taxiZonesGeojson);
+  console.log("boroughsGeojson", boroughsGeojson);
+  console.log("taxi features", taxiZonesGeojson?.features?.length);
+  console.log("borough features", boroughsGeojson?.features?.length);
   const projection = d3.geoIdentity()
     .reflectY(true)
     .fitExtent(
@@ -300,33 +317,71 @@ function drawMap() {
         [margin.left, margin.top],
         [width - margin.right, height - margin.bottom - 46]
       ],
-      activeGeojson
+      taxiZonesGeojson
     );
 
   const path = d3.geoPath(projection);
-  
+
+  mapG.selectAll("path").remove();
+  mapG.selectAll("text.borough-label").remove();
+
   mapPaths = mapG
     .selectAll("path")
-    .data(activeGeojson.features, f => getFeatureKey(f))
+    .data(activeGeojson.features)
     .join("path")
     .attr("d", path)
     .attr("stroke", "#555")
     .attr("stroke-width", state.viewMode === "borough" ? 1.1 : 0.35)
-    .attr("fill", f => {
-      const key = getFeatureKey(f);
-      const v = byZone.get(key);
-      return Number.isFinite(v) ? currentColorScale(v) : "#f2f2f2";
-    })
-    .on("mousemove", (event, f) => {
-    hoveredFeature = f;
-    lastMouseEvent = event;
-    showVis2Tooltip(event, f);
-  })
-  .on("mouseleave", () => {
-    hoveredFeature = null;
-    lastMouseEvent = null;
-    tooltip.style("opacity", 0);
-  });
+    .attr("fill", "#f2f2f2")
+    .on("click", (event, f) => {
+      selectedFeature = f;
+      selectedKey = getFeatureKey(f);
+
+      showVis2Tooltip(event, f);
+
+      mapPaths
+        .attr("stroke", d => getFeatureKey(d) === selectedKey ? "#575353ff" : "#484848ff")
+        .attr("stroke-width", d => getFeatureKey(d) === selectedKey ? 1.8 : state.viewMode === "borough" ? 1.1 : 0.35)
+        .attr("filter", d => getFeatureKey(d) === selectedKey ? "brightness(0.9)" : null);
+    });
+   
+  // Borough outline layer for both borough and neighborhood views
+  if (boroughsGeojson?.features?.length) {
+    mapG
+      .selectAll("path.borough-boundary")
+      .data(boroughsGeojson.features)
+      .join("path")
+      .attr("class", "borough-boundary")
+      .attr("d", path)
+      .attr("fill", "none")
+      .attr("stroke", "#111")
+      .attr("stroke-width", state.viewMode === "borough" ? 1.6 : 1.2)
+      .attr("pointer-events", "none")
+      .style("opacity", state.viewMode === "borough" ? 0.45 : 0.85);
+  }
+  updateChoropleth();
+
+  // Borough labels (always visible)
+  if (boroughsGeojson?.features?.length) {
+    mapLabels = mapG
+      .selectAll("text.borough-label")
+      .data(boroughsGeojson.features)
+      .join("text")
+      .attr("class", "borough-label")
+      .attr("x", f => path.centroid(f)[0])
+      .attr("y", f => path.centroid(f)[1])
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "middle")
+      .attr("font-size", 14)
+      .attr("font-weight", 700)
+      .attr("fill", "#222")
+      .attr("stroke", "white")
+      .attr("stroke-width", 3)
+      .attr("paint-order", "stroke")
+      .style("pointer-events", "none")
+      .style("opacity", state.viewMode === "borough" ? 0.9 : 0.75)
+      .text(f => getFeatureBorough(f));
+  }
 }
   // Legend
   const legendW = 260;
@@ -396,7 +451,11 @@ function drawMap() {
     }
     return d3.format(",.0f")(value);
   }
-
+  function refreshSelectedInfoCard() {
+    if (selectedFeature) {
+      showVis2Tooltip(null, selectedFeature);
+    }
+  }
   function updateLegend(vehicleType) {
     const includeMaxTick = vehicleType !== "all";
 
@@ -494,8 +553,8 @@ function drawMap() {
     <div class="vis2-overlay-card">
       <span class="vis2-field-label">Map view</span>
       <div class="vis2-toggle" role="group" aria-label="Map view">
-        <button type="button" class="vis2-toggle-btn active" data-view="zone">Neighborhood</button>
-        <button type="button" class="vis2-toggle-btn" data-view="borough">Borough</button>
+        <button type="button" class="vis2-toggle-btn active" data-view="borough">Borough</button>
+        <button type="button" class="vis2-toggle-btn" data-view="zone">Neighborhood</button>
       </div>
     </div>
 
@@ -504,7 +563,11 @@ function drawMap() {
       <button type="button" class="vis2-zoom-btn vis2-zoom-out">−</button>
       <button type="button" class="vis2-zoom-btn vis2-zoom-reset">Reset</button>
     </div>
-
+    
+    <div class="vis2-overlay-card vis2-info-card">
+      <div class="vis2-info-title">Hover over an area</div>
+      <div class="vis2-info-body">Trip details will appear here.</div>
+    </div>
     
   `);
 
@@ -543,6 +606,7 @@ function drawMap() {
   );
 
     updateChoropleth();
+    refreshSelectedInfoCard();
   }
 
   function stopPlayDay() {
@@ -570,7 +634,7 @@ function drawMap() {
 
   controls.select(".vis2-time-slider").on("input", e => {
     stopPlayDay();
-    stopStory()
+    // stopStory()
     syncHourFromIndex(+e.target.value);
   });
   
@@ -578,7 +642,7 @@ function drawMap() {
 
   mapOverlay.selectAll(".vis2-toggle-btn").on("click", function () {
     stopPlayDay();
-    stopStory();
+    // stopStory();
 
     state.viewMode = this.dataset.view;
 
@@ -595,6 +659,8 @@ function drawMap() {
     );
 
     updateColorScale(state.vehicleType);
+    svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity);
+    resetInfoCard();
     drawMap();
     updateChoropleth();
   });
@@ -611,20 +677,23 @@ function drawMap() {
   });
   controls.select(".vis2-vehicle-select").on("change", e => {
     stopPlayDay();
-    stopStory();
+    // stopStory();
     state.vehicleType = e.target.value;
 
-    title.text(`NYC Pickups by Taxi Zone — ${getVehicleLabel(state.vehicleType)}, ${state.label}`);
+    title.text(
+      `NYC Pickups by ${state.viewMode === "borough" ? "Borough" : "Taxi Zone"} — ${getVehicleLabel(state.vehicleType)}, ${state.label}`
+    );  
 
     updateColorScale(state.vehicleType);
     updateChoropleth();
+    refreshSelectedInfoCard();
   });
   
 
   
     updateColorScale(state.vehicleType);
     drawMap();
-    updateChoropleth();
+    // updateChoropleth();
   }
 
 
@@ -1143,6 +1212,128 @@ function createVis4(bundle, chartWrapId, selectId, tooltipId, titleId, subtitleI
   });
 }
 
+
+
+
+
+
+
+
+function createDifferenceHeatmap(heatmap2015, heatmap2025, selectedType = "all") {
+  const container = d3.select("#vis5");
+
+  if (container.empty()) {
+    console.error("Missing #vis5 container in HTML");
+    return;
+  }
+
+  if (!heatmap2015.types || !heatmap2025.types) {
+    console.error("Heatmap data does not have .types", heatmap2015, heatmap2025);
+    return;
+  }
+
+  if (!heatmap2015.types[selectedType] || !heatmap2025.types[selectedType]) {
+    console.error("Selected type missing:", selectedType);
+    console.log("2015 types:", Object.keys(heatmap2015.types));
+    console.log("2025 types:", Object.keys(heatmap2025.types));
+    return;
+  }
+
+  const cells2015 = heatmap2015.types[selectedType].cells;
+  const cells2025 = heatmap2025.types[selectedType].cells;
+  console.log("2015 total:", d3.sum(cells2015, d => d.count));
+  console.log("2025 total:", d3.sum(cells2025, d => d.count));
+  container.selectAll("*").remove();
+
+  const margin = { top: 60, right: 80, bottom: 50, left: 90 };
+  const width = 620 - margin.left - margin.right;
+  const height = 360 - margin.top - margin.bottom;
+
+  const svg = container
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom);
+
+  const g = svg
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const hours = d3.range(24);
+
+  const dayName = dow => dayOrder[+dow - 1];
+
+  const key = d => `${d.dow}-${+d.hour}`;
+
+  const map2015 = new Map(cells2015.map(d => [key(d), +d.count]));
+  const map2025 = new Map(cells2025.map(d => [key(d), +d.count]));
+
+  const diffData = [];
+
+  d3.range(1, 8).forEach(dow => {
+    hours.forEach(hour => {
+      const k = `${dow}-${hour}`;
+      diffData.push({
+        dow,
+        day: dayName(dow),
+        hour,
+        diff: (map2025.get(k) || 0) - (map2015.get(k) || 0)
+      });
+    });
+  });
+
+  const maxAbs = d3.max(diffData, d => Math.abs(d.diff)) || 1;
+
+  const x = d3.scaleBand()
+    .domain(hours.map(String))
+    .range([0, width])
+    .padding(0.03);
+
+  const y = d3.scaleBand()
+    .domain(dayOrder)
+    .range([0, height])
+    .padding(0.03);
+
+  const color = d3.scaleDiverging()
+    .domain([-maxAbs, 0, maxAbs])
+    .interpolator(t => d3.interpolateRdBu(1 - t));
+
+  g.append("text")
+    .attr("x", 0)
+    .attr("y", -32)
+    .attr("font-size", 20)
+    .attr("font-weight", 700)
+    .text("Change in Trip Volume: 2025 vs 2015");
+
+  g.append("text")
+    .attr("x", 0)
+    .attr("y", -10)
+    .attr("font-size", 12)
+    .attr("fill", "#555")
+    .text("Blue = fewer trips than 2015, red = more trips than 2015");
+
+  g.selectAll("rect")
+    .data(diffData)
+    .join("rect")
+    .attr("x", d => x(String(d.hour)))
+    .attr("y", d => y(d.day))
+    .attr("width", x.bandwidth())
+    .attr("height", y.bandwidth())
+    .attr("fill", d => color(d.diff))
+    .attr("stroke", "white")
+    .attr("stroke-width", 0.5);
+
+  g.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(
+      d3.axisBottom(x)
+        .tickValues([0, 3, 6, 9, 12, 15, 18, 21, 23].map(String))
+        .tickFormat(d => formatHourTickLabel(+d))
+    );
+
+  g.append("g")
+    .call(d3.axisLeft(y));
+}
 // Load data
 function init() {
     // Ensure the path points to the correct location of your generated CSV
@@ -1163,7 +1354,7 @@ function init() {
     //     console.error("Error loading the CSV file:", error);
     // });
   Promise.all([
-    d3.json("data/zones/taxi_zones.json"),
+    d3.json("data/zones/taxi_zones_wgs84.geojson"),
     d3.json("data/choropleth/nyc_boroughs.geojson"),
     d3.csv("data/processed/zone_hourly.csv", d => ({
       zone_id: +d.zone_id,
@@ -1192,9 +1383,15 @@ function init() {
     createVis3(marketShare);
     createVis4(heatmap2015, "vis4-chart-wrap-2015", "vis4-taxi-type-2015", "vis4-tooltip-2015", "vis4-title-2015", "vis4-subtitle-2015", globalMax);
     createVis4(heatmap2025, "vis4-chart-wrap-2025", "vis4-taxi-type-2025", "vis4-tooltip-2025", "vis4-title-2025", "vis4-subtitle-2025", globalMax);
+    
+    createDifferenceHeatmap(heatmap2015, heatmap2025, "all");
   }).catch(error => {
     console.error("Error loading project data:", error);
   });
 }
+
+
+
+
 
 window.addEventListener("load", init);
