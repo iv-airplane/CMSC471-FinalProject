@@ -171,7 +171,18 @@
 
 #vis3 svg {
     margin: 2rem 0;
-    border: 1px solid #ccc; /*otherwise you can't see this part*/
+    border: 1px solid #ccc; 
+}
+
+/* Put visualization in its own container to add border */
+#vis3-outer-container {
+  border: 1px solid #ddd;
+  border-radius: 14px;
+  padding: 24px;
+  background: white;
+  width: fit-content;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 
