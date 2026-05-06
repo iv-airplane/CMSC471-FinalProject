@@ -728,7 +728,7 @@ function createStackedBarChart() {
                         { year: 2015, label: "Uber enters" },
                         { year: 2018, label: "Ride-hailing cap" },
                         { year: 2020, label: "COVID" },
-                        { year: 2023, label: "Congestion pricing" }
+                        { year: 2025, label: "Congestion pricing" }
                     ]
                 },
                 mark: {
