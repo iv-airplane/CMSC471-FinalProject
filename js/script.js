@@ -1222,6 +1222,37 @@ function createVis4(bundle, chartWrapId, selectId, tooltipId, titleId, subtitleI
 function createDifferenceHeatmap(heatmap2015, heatmap2025, selectedType = "all") {
   const container = d3.select("#vis5");
 
+  const tooltip = d3.select("#vis5-tooltip");
+    tooltip.style("opacity", 0);
+    
+  function showTooltip(html) {
+    tooltip
+      .style("opacity", 1)
+      .html(html)
+      .style("left", null)
+      .style("top", null);
+  }
+
+  function hideTooltip() {
+    tooltip.style("opacity", 0);
+  }
+
+function positionTooltip(event) {
+  const pad = 12;
+  let x = event.pageX + pad;
+  let y = event.pageY + pad;
+
+  const rect = tooltip.node().getBoundingClientRect();
+
+  if (x + rect.width > window.innerWidth) {
+    x = event.pageX - rect.width - pad;
+  }
+  if (y + rect.height > window.innerHeight) {
+    y = event.pageY - rect.height - pad;
+  }
+
+  tooltip.style("left", x + "px").style("top", y + "px");
+}  
   if (container.empty()) {
     console.error("Missing #vis5 container in HTML");
     return;
@@ -1267,7 +1298,7 @@ function createDifferenceHeatmap(heatmap2015, heatmap2025, selectedType = "all")
 
   const map2015 = new Map(cells2015.map(d => [key(d), +d.count]));
   const map2025 = new Map(cells2025.map(d => [key(d), +d.count]));
-
+  
   const diffData = [];
 
   d3.range(1, 8).forEach(dow => {
@@ -1321,7 +1352,24 @@ function createDifferenceHeatmap(heatmap2015, heatmap2025, selectedType = "all")
     .attr("height", y.bandwidth())
     .attr("fill", d => color(d.diff))
     .attr("stroke", "white")
-    .attr("stroke-width", 0.5);
+    .attr("stroke-width", 0.5)
+    .on("mouseenter", (event, d) => {
+      const direction =
+        d.diff > 0 ? "more trips than 2015" :
+        d.diff < 0 ? "fewer trips than 2015" :
+        "no change from 2015";
+
+      showTooltip(
+        `<strong>${d.day}</strong><br/>
+        Hour <strong>${d.hour}:00</strong>–<strong>${d.hour}:59</strong><br/>
+        <strong>${d3.format(",")(Math.abs(d.diff))}</strong> ${direction}`
+      );
+    })
+    .on("mouseleave", hideTooltip);
+
+
+
+
 
   g.append("g")
     .attr("transform", `translate(0,${height})`)
@@ -1381,7 +1429,7 @@ function init() {
     
     createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson);
     createVis3(marketShare);
-    createVis4(heatmap2015, "vis4-chart-wrap-2015", "vis4-taxi-type-2015", "vis4-tooltip-2015", "vis4-title-2015", "vis4-subtitle-2015", globalMax);
+    // createVis4(heatmap2015, "vis4-chart-wrap-2015", "vis4-taxi-type-2015", "vis4-tooltip-2015", "vis4-title-2015", "vis4-subtitle-2015", globalMax);
     createVis4(heatmap2025, "vis4-chart-wrap-2025", "vis4-taxi-type-2025", "vis4-tooltip-2025", "vis4-title-2025", "vis4-subtitle-2025", globalMax);
     
     createDifferenceHeatmap(heatmap2015, heatmap2025, "all");
