@@ -1,8 +1,9 @@
 /* Reset default styles */
 * {
     font-family: Arial, sans-serif;
-    max-width: 800px;
-    margin: 0px auto;
+    /* max-width: 800px; */
+    /* margin: 0px auto; */
+    
     line-height: 1.8;
 }
 
@@ -14,8 +15,8 @@
 }
 
 #vis2 svg {
-    margin: 2rem 0;
-    border: 1px solid #ccc; /*otherwise you can't see this part*/
+    max-width: 100%;
+    height: auto;
 }
 
 #vis2 .vis2-controls {
@@ -169,26 +170,21 @@
     box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.35);
 }
 
-#vis3 svg {
-    margin: 2rem 0;
-    border: 1px solid #ccc; 
+#vis3 {
+    max-width: 760px;
+    margin: 0 auto;
+    overflow-x: auto;
 }
 
-/* Put visualization in its own container to add border */
-#vis3-outer-container {
-  border: 1px solid #ddd;
-  border-radius: 14px;
-  padding: 24px;
-  background: white;
-  width: fit-content;
-  margin: 0 auto;
-  box-sizing: border-box;
+#vis3 svg {
+    max-width: 100%;
+    height: auto;
 }
 
 
 /* Vis4 heatmap (scoped; chart wider than 800px body column) */
 #vis4 {
-    max-width: 1100px;
+    max-width: 760px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -200,6 +196,7 @@
     padding: 16px 12px 24px;
     border-radius: 12px;
     margin: 1rem 0;
+    display: block
 }
 
 #vis4 .vis4-app * {
@@ -215,7 +212,7 @@
 }
 
 #vis4 .vis4-sub {
-    text-align: left;
+    text-align: center;
     font-size: 0.9rem;
     color: #555;
     margin-bottom: 16px;
@@ -225,7 +222,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 12px 20px;
     margin-bottom: 16px;
 }
@@ -323,4 +320,322 @@ button {
     stroke-width: 3px;
     stroke-linecap: round;
     stroke-linejoin: round;
+}
+
+
+/* Webpage Formatting */
+h2 {
+    margin-top: 40px;
+    margin-bottom: 10px;
+}
+
+p {
+    margin-bottom: 12px;
+}
+
+
+.subtitle {
+    text-align: center;
+    font-size: 16px;
+    color: #6b7280;
+    margin-top: -8px;
+    margin-bottom: 40px;
+}
+body {
+    background: #f0f4ff;
+    margin: 0;
+    padding: 20px;
+}
+
+main {
+    max-width: 1180px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0px 0 10px;
+    color: #fff;
+    line-height: 1.2;
+}
+
+h1 span.accent {
+    color: #fb923c;
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 20px;
+    color: #94a3b8;
+    margin-top: -20px;
+    margin-bottom: 0;
+}
+
+header {
+    background: linear-gradient(135deg, #4c412d 0%, #16213e 60%, #0f3460 100%);
+    border-radius: 0 0 24px 24px;
+    padding: 3rem 2rem 2.5rem;
+    margin-bottom: 2.5rem;
+    max-width: 100%;
+}
+.divider {
+    width: 200px;
+    height: 2px;
+    background: #fb923c;
+    margin: 1.25rem auto;
+    border-radius: 2px;
+}
+.project-intro {
+    text-align: center;
+    font-size: 15px;
+    color: #cbd5e1;
+    max-width: 720px;
+    margin: 1rem auto 0;
+    line-height: 1.7;
+}
+section {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.dataset-section,
+.implementation-section,
+.sources-section {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-viz-section {
+    max-width: 1180px;
+}
+
+.supporting-viz-section {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #1e293b;
+    font-size: 1.15rem;
+}
+
+p {
+    margin-bottom: 12px;
+    color: #475569;
+}
+
+ul li {
+    color: #475569;
+}
+
+a {
+    color: #ea580c;
+}
+
+a:hover {
+    color: #c2410c;
+}
+
+.vehicle-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+    align-items:stretch;
+}
+
+.vehicle-tag {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    
+}
+
+
+.dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    /* flex-shrink: 0; */
+    margin-top: 4px;
+}
+.vehicle-tag:hover {
+    background: #f1f5f9;
+    transform: translateY(-2px);
+    transition: 0.15s ease;
+}
+.dot--yellow { background: #facc15; }
+.dot--green  { background: #4ade80; }
+.dot--orange { background: #fb923c; }
+.dot--blue {background: #60a5fa;}
+.vehicle-name {
+    text-align: left;     /* left aligned */
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.vehicle-desc {
+    text-align: center;   /* centered */
+    font-size: 13px;
+    color: #64748b;
+}
+.emphasis {
+    font-weight: 600;
+    color: #c19068;   /* accent color (orange) */
+}
+
+.vis2-toggle {
+  display: inline-flex;
+  background: #f1f3f5;
+  border: 1px solid #d0d7de;
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.vis2-toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vis2-toggle-btn:hover {
+  color: #111;
+}
+
+.vis2-toggle-btn.active {
+  background: white;
+  color: #111;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+}
+.vis2-zoom-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vis2-zoom-btn {
+  border: 1px solid #d0d7de;
+  background: white;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vis2-zoom-btn:hover {
+  background: #f1f3f5;
+}
+
+#vis2 {
+  position: relative;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.vis2-map-overlay {
+  position: absolute;
+  top: 56px;
+  right: 18px;   
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; 
+  gap: 8px;
+  pointer-events: none;
+}
+
+.vis2-overlay-card {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid #d0d7de;
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+  min-width: 160px; /* 👈 makes it look balanced */
+}
+
+.vis2-zoom-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.vis2-zoom-btn {
+  flex: 1;
+  border: 1px solid #d0d7de;
+  background: white;
+  border-radius: 999px;
+  padding: 6px 0;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vis2-story-card {
+  width: 260px;
+}
+
+.vis2-story-kicker {
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.vis2-story-card h4 {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+}
+
+.vis2-story-card p {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #475569;
+}
+
+.vis2-story-btn {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  background: #111827;
+  color: white;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vis4-app {
+    display: flex;
+    gap: 24px;
+}
+
+.heatmap-instance {
+    flex: 1;
 }
