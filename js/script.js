@@ -894,7 +894,7 @@ function createTopRow() {
             { 
                 // If yearSelection exists, filter by the selected year. 
                 // Otherwise, show only 2020.
-                filter: "yearSelection.year ? datum.year === yearSelection.year[0] : datum.year === 2020"
+                filter: "yearSelection.year ? datum.year === yearSelection.year[0] : datum.year === 2015"
             }
         ],
         hconcat: [

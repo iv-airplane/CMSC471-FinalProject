@@ -102,7 +102,7 @@
         </section>
 
         <section class = "viz-section supporting-viz-section">
-            <h2>How did travel behavior change?</h2>
+            <h2>How did ride-hailing reshape the taxi industry in NYC?</h2>
             <p>
                 This visualization aims to show how market share of different taxi providers changed after the rise of the ride-hailing services in NYC. The stacked bar chart displays the percentage market share of each category for every year in the dataset, making it easier to observe long-term structural changes in the industry. Key events are annotated to provide additional context.
             </p>
@@ -162,12 +162,15 @@
         <section class = "viz-section supporting-viz-section">
             <h2>Deeper Dive: How has travel behavior shifted?</h2>
             <p>
-               To understand how these patterns evolved, this difference heatmap compares 2025 to 2015. 
-                Blue areas represent times with fewer trips than in 2015, while red areas indicate increases.
-
-                We observe declines during traditional weekday commuting hours, alongside increases in 
-                evening and weekend activity. This shift highlights a move away from rigid commuting patterns 
-                toward more flexible, on-demand travel behavior.
+               To understand how travel patterns evolved over time, this heatmap compares total taxi trips across all providers from October 2015 to October 2025. 
+               Blue areas represent times with fewer trips than in 2015, while red areas indicate periods with increased trip volume. Overall, most periods show higher trip counts in 2025 than in 2015.
+            </p>
+            <p>
+                The largest increases are concentrated during commuting hours, particularly from 6-9 AM and 4-6 PM on weekdays. Wednesday stands out as the day with the strongest growth, especially during the morning (7-9 AM) and evening (4-7 PM) commuting hours. In contrast, Saturday shows the sharpest decline in late-night activity, especially between 12 and 4 AM. 
+                While other weekdays experienced some increase in late-night trips, the growth was relatively modest.
+            </p>
+            <p>
+                One possible explanation is that hybrid work schedules have concentrated commuting activity into the middle of the week, increasing demand for taxis and ride-hailing services from Wednesday through Friday. At the same time, the decline in late-night Saturday trips may suggest changes in NYC nightlife and social behavior compared to 2015.
             </p>
             
             <div id="vis5"></div>
@@ -185,23 +188,13 @@
                 This map allows you to explore how trip activity varies throughout the day, at both the 
                 <span class="emphasis">borough level</span> and the more detailed 
                 <span class="emphasis">neighborhood (taxi zone) level</span>.
-
-                At the borough level, we can observe broad patterns — such as Manhattan’s concentration of 
-                daytime activity and the stronger evening demand in outer boroughs like Brooklyn and Queens. 
-                Switching to the neighborhood view reveals finer-grained differences, highlighting specific 
-                areas where demand is especially high or changes rapidly over time.
             </p>
 
             <p>
-                Together, these views show that travel patterns are not uniform across the city. 
-                Instead, demand varies significantly depending on both location and time of day, reflecting 
-                a more flexible and distributed transportation system.
+                At the borough level, recognition of broad patterns is enabled, highlighting trends between The Bronx, Brooklyn, Manhattan, Queens, and Staten Island. The neighborhood view allows granular insight on localized hotspots of activity.
+                 This allows one to uncover finer detail on the contribution of specific areas to the city's transportation network, emphasizing the progressive nature of mobility throughout New York City.
             </p>
 
-            <p class="mini-note">
-                For ride-hailing platforms and taxi operators, understanding demand at both the borough and 
-                neighborhood level is critical for decisions such as driver allocation, pricing, and service coverage.
-            </p>
             <div id="vis2"></div> 
 
             <p>
@@ -221,7 +214,7 @@
 
 
         <section class = "implementation-section">
-            <h2>Implementation Details</h2>
+            <h2>CONSIDER MOVING TO THE README, GROUP DECISION: Implementation Details</h2>
 
             <h3>Data Processing</h3>
             <p>
@@ -271,6 +264,9 @@
                 different time periods and vehicle types, making it easier to compare patterns and
                 understand how transportation activity changes across the city.
             </p>
+
+            <h2>CONSIDER ADDING HERE, GROUP DECISION: Summary of findings</h2>
+
         </section>
         
             
