@@ -133,30 +133,27 @@
         <section id="vis5-section supporting-viz-section">
             <h2>What does travel look like today</h2>
             <p>
-                The City Wake Up heatmap reveals when New York City travels, mapping trip activity across every hour of the day and every day of the week. Each cell encodes trip volume using a sequential yellow-to-red color scale, where darker red indicates higher demand. A dropdown allows the reader to filter by vehicle type (all types, yellow taxi, green taxi, FHV, or high-volume FHV) so that the temporal rhythms of each part of the fleet can be examined independently. 
-                A tooltip on hover provides the exact day, hour range, and trip count for any cell of interest.
+                The City Wake Up heatmap uses <strong>October 2025</strong> TLC trip records (about 28.2 million pickups across all vehicle types in that month). Each cell sums trips for one hour of the day and one day of the week; color follows a sequential yellow-to-red scale, with deeper red indicating more trips. Use the dropdown to view all types together or to isolate yellow taxi, green taxi, FHV, or high-volume FHV (app-based) trips. Hovering shows the exact weekday, hour range, and count for that cell.
             </p>
-            
-             <div id="vis4">
+
+            <div id="vis4">
                 <div class="vis4-app">
                     <h3 id="vis4-title">City Wake Up: Total Trips by Hour and Day of Week</h3>
                     <p class="vis4-sub" id="vis4-subtitle"></p>
-                <div class="vis4-controls">
-                    <label for="vis4-taxi-type">Taxi type</label>
-                    <select id="vis4-taxi-type" aria-label="Taxi type"></select>
+                    <div class="vis4-controls">
+                        <label for="vis4-taxi-type">Taxi type</label>
+                        <select id="vis4-taxi-type" aria-label="Taxi type"></select>
+                    </div>
+                    <div id="vis4-chart-wrap"></div>
                 </div>
-            <div id="vis4-chart-wrap"></div>
             </div>
-             </div>
             <div id="vis4-tooltip" role="status" aria-live="polite"></div>
 
             <p>
-                The heatmap reveals that trip demand in New York City follows two distinct rhythms depending on the day of the week. On weekdays, activity drops sharply in the early morning hours before rising through the morning commute, dipping slightly in the afternoon, and peaking again during the evening. Weekends tell a different story: the overnight hours remain active well into the early morning, demand builds more gradually through the day, 
-                and the evening peak arrives later and sustains longer into the night.
+                In October 2025, weekday demand still follows a commuting-shaped curve: volumes are lowest in the predawn hours, climb through the morning, ease somewhat mid-day, and rise again toward the evening. Weekends are flatter in the morning but stay busier late at night and into the early morning than typical weekdays, and the busiest evening hours shift slightly later.
             </p>
             <p>
-                These patterns shift meaningfully depending on vehicle type. High-volume FHV services show their strongest activity on Friday and Saturday evenings, reflecting their dominance in leisure and nightlife travel. Yellow taxis, by contrast, remain more concentrated in the traditional weekday commuting hours, consistent with their geographic concentration in Manhattan. Together, these contrasts reinforce a broader theme of the project: ride-hailing has 
-                not simply replaced traditional taxis, but has expanded into travel patterns, such as late nights, weekends, outer boroughs, that taxis never fully served.
+                Vehicle type splits that story further. For the month shown, high-volume FHV (app) trips peak on <strong>Friday</strong> in the <strong>early evening</strong> (around 7 p.m.), with Saturday night also elevated—consistent with ride-hail use for going out. Yellow taxis peak slightly earlier on Friday (around 6 p.m.), aligning with end-of-work travel and street-hail demand in core areas. Together, these contrasts support the project theme: app-based services did not only substitute for taxis; they concentrate more of their volume in late-week and evening periods while yellow taxis remain tied to classic weekday peaks.
             </p>
             
             

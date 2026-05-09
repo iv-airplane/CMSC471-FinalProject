@@ -1041,9 +1041,9 @@ function createVis4(bundle) {
     fhvhv: "FHVHV (high-volume / app)",
   };
 
-  const margin = { top: 16, right: 220, bottom: 72, left: 120 };
-  const innerWidth = 24 * 28;
-  const innerHeight = 7 * 36;
+  const margin = { top: 20, right: 232, bottom: 76, left: 128 };
+  const innerWidth = 24 * 34;
+  const innerHeight = 7 * 44;
   const width = margin.left + innerWidth + margin.right;
   const height = margin.top + innerHeight + margin.bottom;
 

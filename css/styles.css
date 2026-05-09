@@ -182,21 +182,21 @@
 }
 
 
-/* Vis4 heatmap (scoped; chart wider than 800px body column) */
+/* Vis4 heatmap — aligned with supporting sections (no grey panel; same width as vis3 area) */
 #vis4 {
-    max-width: 760px;
+    max-width: 900px;
+    width: 100%;
     margin-left: auto;
     margin-right: auto;
 }
 
 #vis4 .vis4-app {
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: #e8e8ea;
-    color: #333;
-    padding: 16px 12px 24px;
-    border-radius: 12px;
+    font-family: inherit;
+    background: transparent;
+    color: #0f172a;
+    padding: 0;
     margin: 1rem 0;
-    display: block
+    display: block;
 }
 
 #vis4 .vis4-app * {
@@ -206,15 +206,15 @@
 #vis4 #vis4-title {
     text-align: center;
     font-weight: 600;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     margin: 0 0 8px;
-    color: #2a2a2a;
+    color: #0f172a;
 }
 
 #vis4 .vis4-sub {
     text-align: center;
-    font-size: 0.9rem;
-    color: #555;
+    font-size: 0.95rem;
+    color: #64748b;
     margin-bottom: 16px;
 }
 
@@ -229,43 +229,52 @@
 
 #vis4 .vis4-controls label {
     font-size: 0.9rem;
-    color: #444;
+    color: #64748b;
+    font-weight: 600;
 }
 
 #vis4 #vis4-taxi-type {
     font-size: 0.95rem;
     padding: 8px 12px;
     border-radius: 8px;
-    border: 1px solid #bbb;
+    border: 1px solid #cbd5e1;
     background: #fff;
-    min-width: 200px;
+    min-width: 220px;
+    color: #0f172a;
+}
+
+#vis4 #vis4-taxi-type:hover {
+    border-color: #94a3b8;
 }
 
 #vis4 #vis4-chart-wrap {
-    background: #f0f0f2;
+    background: transparent;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    padding: 12px 8px 16px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
 }
 
 #vis4 #vis4-chart-wrap svg {
     display: block;
     margin: 0 auto;
     border: none;
+    max-width: 100%;
+    height: auto;
 }
 
 #vis4 .axis text {
-    fill: #444;
+    fill: #475569;
     font-size: 11px;
 }
 
 #vis4 .axis path,
 #vis4 .axis line {
-    stroke: #aaa;
+    stroke: #94a3b8;
 }
 
 #vis4 .cell {
-    stroke: #f5f5f6;
+    stroke: #fff;
     stroke-width: 0.5;
     cursor: crosshair;
 }
@@ -632,10 +641,9 @@ a:hover {
 }
 
 .vis4-app {
-    display: flex;
-    gap: 24px;
+    display: block;
 }
 
 .heatmap-instance {
-    flex: 1;
+    width: 100%;
 }
