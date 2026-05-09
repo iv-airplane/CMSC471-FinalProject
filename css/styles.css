@@ -249,10 +249,7 @@
 
 #vis4 #vis4-chart-wrap {
     background: transparent;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
     padding: 12px 8px 16px;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
 }
 
 #vis4 #vis4-chart-wrap svg {
