@@ -99,6 +99,13 @@
                     </div>
                 </div>
             </div>
+
+            <p>
+                We present results in widening focus: <strong>market share by year</strong> (the long arc),
+                then <strong>when</strong> trips happen in a recent month, then <strong>how that weekly clock shifted</strong>
+                over a decade (same calendar month, two years), and finally <strong>where</strong> demand concentrates
+                across the city on one day.
+            </p>
         </section>
 
         <section class = "viz-section supporting-viz-section">
@@ -107,14 +114,14 @@
                 This visualization aims to show how market share of different taxi providers changed after the rise of the ride-hailing services in NYC. The stacked bar chart displays the percentage market share of each category for every year in the dataset, making it easier to observe long-term structural changes in the industry. Key events are annotated to provide additional context.
             </p>
             <p>
-                The donut chart and legend at the top summarizes a single selected year in greater detail.They show both the total number of trips recorded that year and the percentage share of each vehicle category. Selecting a year in the bar chart updates the donut chart and legend to reflect the chosen year.
+                The donut chart and legend at the top summarize a single selected year in greater detail. They show both the total number of trips recorded that year and the percentage share of each vehicle category. Selecting a year in the bar chart updates the donut chart and legend to reflect the chosen year.
             </p>
             <div id="vis3"></div>
             <!-- Writeup -->
             <p>
                 Green taxis began operating in NYC in 2013. However, their market share has steadily declined since 2015,
                  and they have never achieved popularity comparable to yellow taxis. The sharpest decline occurred during the COVID-19 pandemic: 
-                 green taxi trips fell from 6.3 million in 2019 to 1.7 million in 2020, a 3.6x decrease. By 2023, green taxis accounted for only about 787,000 trips. According to Wikipedia, TLC data showed that only 891 green taxis were still operating by February 2023, and in May 2023, the TLC began phasing out the program. The growth of app-dispatched ride-hailing services such as Uber and Lyft largely replaced the market segment that green taxis were originally designed to serve.
+                 green taxi trips fell from 6.3 million in 2019 to 1.7 million in 2020, about <strong>27%</strong> of the 2019 level (a drop of roughly 73%). By 2023, green taxis accounted for only about 787,000 trips. According to Wikipedia, TLC data showed that only 891 green taxis were still operating by February 2023, and in May 2023, the TLC began phasing out the program. The growth of app-dispatched ride-hailing services such as Uber and Lyft largely replaced the market segment that green taxis were originally designed to serve.
             </p>
             <p>
                 Despite the rapid rise of ride-hailing services, the iconic yellow taxi has remained prevalent. 
@@ -123,23 +130,23 @@
 
             <h4>Events of interest</h4>
             <ul>
-                <li>The 2018 ride-hailing cap - a temporary pause on issuing new HFHV licenses to study congestion - did not significantly slow the growth of app-dispatched taxis, whose market share still increased by about 6%.</li>
+                <li>The 2018 ride-hailing cap (a temporary pause on issuing new HVFHV licenses to study congestion) did not significantly slow the growth of app-dispatched services; their market share still increased by about 6%.</li>
                 <li>As expected, the COVID-19 pandemic caused a dramatic decline in total taxi trips, dropping from approximately 368 million trips in 2019 to 184 million in 2020.</li>
-                <li>The rise of HFHV services significantly disrupted the traditional taxi industry, reducing the market share of street-hail services by roughly 50% for yellow taxis and about 8% for green taxis.</li>
+                <li>The rise of HVFHV services significantly disrupted the traditional taxi industry, reducing the market share of street-hail services by roughly 50% for yellow taxis and about 8% for green taxis.</li>
             </ul>
 
         </section>
 
-        <section id="vis5-section supporting-viz-section">
-            <h2>What does travel look like today</h2>
+        <section id="vis4-section" class="supporting-viz-section">
+            <h2>What does travel look like today?</h2>
             <p>
                 The City Wake Up heatmap uses <strong>October 2025</strong> TLC trip records (about 28.2 million pickups across all vehicle types in that month). Each cell sums trips for one hour of the day and one day of the week; color follows a sequential yellow-to-red scale, with deeper red indicating more trips. Use the dropdown to view all types together or to isolate yellow taxi, green taxi, FHV, or high-volume FHV (app-based) trips. Hovering shows the exact weekday, hour range, and count for that cell.
             </p>
 
             <div id="vis4">
                 <div class="vis4-app">
-                    <h3 id="vis4-title">City Wake Up: Total Trips by Hour and Day of Week</h3>
-                    <p class="vis4-sub" id="vis4-subtitle"></p>
+                    <h3 id="vis4-title" class="heatmap-section-title">City Wake Up: Total Trips by Hour and Day of Week</h3>
+                    <p class="vis4-sub heatmap-section-sub" id="vis4-subtitle"></p>
                     <div class="vis4-controls">
                         <label for="vis4-taxi-type">Taxi type</label>
                         <select id="vis4-taxi-type" aria-label="Taxi type"></select>
@@ -147,13 +154,13 @@
                     <div id="vis4-chart-wrap"></div>
                 </div>
             </div>
-            <div id="vis4-tooltip" role="status" aria-live="polite"></div>
+            <div id="vis4-tooltip" class="heatmap-tooltip" role="status" aria-live="polite"></div>
 
             <p>
                 In October 2025, weekday demand still follows a commuting-shaped curve: volumes are lowest in the predawn hours, climb through the morning, ease somewhat mid-day, and rise again toward the evening. Weekends are flatter in the morning but stay busier late at night and into the early morning than typical weekdays, and the busiest evening hours shift slightly later.
             </p>
             <p>
-                Vehicle type splits that story further. For the month shown, high-volume FHV (app) trips peak on <strong>Friday</strong> in the <strong>early evening</strong> (around 7 p.m.), with Saturday night also elevated—consistent with ride-hail use for going out. Yellow taxis peak slightly earlier on Friday (around 6 p.m.), aligning with end-of-work travel and street-hail demand in core areas. Together, these contrasts support the project theme: app-based services did not only substitute for taxis; they concentrate more of their volume in late-week and evening periods while yellow taxis remain tied to classic weekday peaks.
+                Vehicle type splits that story further. For the month shown, high-volume FHV (app) trips peak on <strong>Friday</strong> in the <strong>early evening</strong> (around 7 p.m.), and Saturday night is also elevated in a pattern consistent with ride-hail use for going out. Yellow taxis peak slightly earlier on Friday (around 6 p.m.), aligning with end-of-work travel and street-hail demand in core areas. Together, these contrasts support the project theme: app-based services did not only substitute for taxis; they concentrate more of their volume in late-week and evening periods while yellow taxis remain tied to classic weekday peaks.
             </p>
             
             
@@ -162,60 +169,73 @@
         <section class = "viz-section supporting-viz-section">
             <h2>Deeper Dive: How has travel behavior shifted?</h2>
             <p>
-               To understand how travel patterns evolved over time, this heatmap compares total taxi trips across all providers from October 2015 to October 2025. 
-               Blue areas represent times with fewer trips than in 2015, while red areas indicate periods with increased trip volume. Overall, most periods show higher trip counts in 2025 than in 2015.
+                The snapshot above is <strong>October 2025</strong> only. The view below keeps the same hour-by-weekday layout but compares
+                <strong>October 2025</strong> to <strong>October 2015</strong> cell by cell (after matching vehicle-type definitions as closely as the TLC allows).
+                Blue means fewer trips in that slot than ten years earlier; red means more. This is explicitly about
+                <em>change in the weekly clock</em>, not a second “live today” view.
             </p>
             <p>
-                The largest increases are concentrated during commuting hours, particularly from 6-9 AM and 4-6 PM on weekdays. Wednesday stands out as the day with the strongest growth, especially during the morning (7-9 AM) and evening (4-7 PM) commuting hours. In contrast, Saturday shows the sharpest decline in late-night activity, especially between 12 and 4 AM. 
+                To understand how travel patterns evolved over time, this heatmap compares total taxi trips across all providers from October 2015 to October 2025.
+                Blue areas represent times with fewer trips than in 2015, while red areas indicate periods with increased trip volume. Overall, most periods show higher trip counts in 2025 than in 2015.
+            </p>
+            <p>
+                The largest increases are concentrated during commuting hours, particularly from 6-9 AM and 4-6 PM on weekdays. Wednesday stands out as the day with the strongest growth, especially during the morning (7-9 AM) and evening (4-7 PM) commuting hours. In contrast, Saturday shows the sharpest decline in late-night activity, especially between 12 and 4 AM.
                 While other weekdays experienced some increase in late-night trips, the growth was relatively modest.
             </p>
             <p>
                 One possible explanation is that hybrid work schedules have concentrated commuting activity into the middle of the week, increasing demand for taxis and ride-hailing services from Wednesday through Friday. At the same time, the decline in late-night Saturday trips may suggest changes in NYC nightlife and social behavior compared to 2015.
             </p>
             
-            <div id="vis5"></div>
-            <div id="vis5-tooltip" class="tooltip" role="status" aria-live="polite"></div>
+            <div id="vis5-app-wrap">
+                <h3 id="vis5-chart-title" class="heatmap-section-title">Change in trip volume: October 2025 vs October 2015</h3>
+                <p id="vis5-chart-sub" class="heatmap-section-sub">Trip difference per weekday and hour (all vehicle types). Blue means fewer trips in 2025 than in 2015; red means more.</p>
+                <div id="vis5"></div>
+            </div>
+            <div id="vis5-tooltip" class="heatmap-tooltip" role="status" aria-live="polite"></div>
         </section>
-
-        </section>
-
 
          <!-- Ryley's Visualization -->
         <section class = "hero-viz-section">
             <h2>How does the city move today?</h2>
             <p>
-                Today’s transportation system reflects these changes in behavior across both space and time. 
-                This map allows you to explore how trip activity varies throughout the day, at both the 
-                <span class="emphasis">borough level</span> and the more detailed 
+                Today’s transportation system reflects these changes in behavior across both space and time.
+                This map allows you to explore how trip activity varies throughout the day, at both the
+                <span class="emphasis">borough level</span> and the more detailed
                 <span class="emphasis">neighborhood (taxi zone) level</span>.
+                It uses <strong>Wednesday, October 16, 2024</strong> (see processed trip data for that date), so you can step through hours without averaging away geography.
             </p>
 
             <p>
-                At the borough level, recognition of broad patterns is enabled, highlighting trends between The Bronx, Brooklyn, Manhattan, Queens, and Staten Island. The neighborhood view allows granular insight on localized hotspots of activity.
-                 This allows one to uncover finer detail on the contribution of specific areas to the city's transportation network, emphasizing the progressive nature of mobility throughout New York City.
+                At the borough level, broad patterns emerge across The Bronx, Brooklyn, Manhattan, Queens, and Staten Island. The neighborhood view adds localized hotspots and how they shift through the day.
             </p>
 
-            <div id="vis2"></div> 
+            <p class="mini-note">
+                For ride-hailing platforms and taxi operators, demand at both borough and neighborhood scale matters for allocation and service design.
+            </p>
+            <div id="vis2"></div>
 
             <p>
-                Together, these views illustrate that transportation activity in New York City is highly uneven across both location and time. 
-                From the borough level view, it can be observed that Manhattan has the highest amount of daytime activity because of its prominence as an economic hub, whereas outer boroughs such as Queens experience increased activity in the evening, highlighting its residential and nightlife activity.
-            </p>
-            <p>
-                In terms of localities, however, it becomes apparent that the demand for transportation is not uniform but occurs in certain hotspots. There are certain taxi zones where the number of trips remains fairly consistent, whereas there are other zones that fluctuate sharply according to the time
-                 of the day. It becomes apparent that there is a large level of flexibility and decentralization of transportation, reflecting the city's multifaceted nature.
-            </p>
-            <p>
-                It is vital for ride-hailing companies, taxi drivers, and urban planners to recognize the variations in transportation across space and time. Insights may assist policy-makers in areas such as driver dispatching, dynamic pricing, traffic control, and coverage planning.
+                In short: trip activity is highly uneven in space and time; the map makes that unevenness legible on one representative midweek day.
             </p>
 
         </section>
 
         <section class = "implementation-section">
-            <h2>Summary of findings</h2>
-
-            <p>TODO</p>
-
+            <h2>Implementation</h2>
+            <p>
+                The page is static <strong>HTML, CSS, and JavaScript</strong>. We aggregate millions of TLC rows offline with
+                <strong>DuckDB</strong>, serve compact CSV/JSON to the browser, and build views with <strong>D3</strong> (map and heatmaps) and
+                <strong>Vega-Lite</strong> (market share). Taxi zones come from TLC shapefiles, simplified to GeoJSON (e.g. via Mapshaper).
+            </p>
+            <p>
+                <strong>Run locally:</strong> clone the repo, then from the project root run <code>python -m http.server 8765</code> and open
+                <code>http://127.0.0.1:8765/</code>. Regenerating processed files is documented in the repository.
+            </p>
+            <p>
+                Full pipeline notes, schemas, preprocessing scripts, and design rationale are in the code repository
+                (<a href="https://github.com/iv-airplane/CMSC471-FinalProject" target="_blank" rel="noopener">GitHub</a>):
+                <code>README.md</code> and <code>DATA_README.md</code>.
+            </p>
         </section>
         
             
@@ -260,17 +280,16 @@
             </ul>
             </section>
 
-            <!-- Load all the necessary libraries and our script -->
-            <script src="https://d3js.org/d3.v7.min.js"></script>
-            <script src="js/script.js"></script>
-
-            <!-- Load vega-lite -->
-            <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
-            <script src="https://cdn.jsdelivr.net/npm/vega-lite@6"></script>
-            <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-            
-        </body>
     </main>
-    
-    
+
+    <!-- Load all the necessary libraries and our script -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/script.js"></script>
+
+    <!-- Load vega-lite -->
+    <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+
+</body>
 </html>

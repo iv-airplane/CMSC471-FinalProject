@@ -22,6 +22,96 @@ function formatHourTickLabel(hour) {
   return `${h12}${suffix}`;
 }
 
+/** Pixel layout shared by vis4 (trip volume) and vis5 (Oct 2025 minus Oct 2015 difference). */
+const HEATMAP_GRID = {
+  innerWidth: 24 * 34,
+  innerHeight: 7 * 44,
+  margin: { top: 20, right: 220, bottom: 76, left: 128 },
+  legendBarWidth: 18,
+  legendSegments: 48,
+};
+
+function heatmapOuterSize() {
+  const m = HEATMAP_GRID.margin;
+  return {
+    width: m.left + HEATMAP_GRID.innerWidth + m.right,
+    height: m.top + HEATMAP_GRID.innerHeight + m.bottom,
+  };
+}
+
+/** Fixed tooltip near cursor; flip when near viewport edge (both heatmaps). */
+function positionHeatmapTooltip(tooltip, event, pad = 12) {
+  let x0 = event.clientX + pad;
+  let y0 = event.clientY + pad;
+  const node = tooltip.node();
+  if (!node) return;
+  const rect = node.getBoundingClientRect();
+  if (x0 + rect.width > window.innerWidth - 8) x0 = event.clientX - rect.width - pad;
+  if (y0 + rect.height > window.innerHeight - 8) y0 = event.clientY - rect.height - pad;
+  tooltip.style("left", x0 + "px").style("top", y0 + "px");
+}
+
+/**
+ * Builds 24 x 7 band scales and draws matching hour/day axes (hours labeled 2-24).
+ * @returns {{ x: d3.ScaleBand, y: d3.ScaleBand, dayOrder: string[] }}
+ */
+function appendHeatmapHourDayAxes(g, innerWidth, innerHeight) {
+  const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const x = d3
+    .scaleBand()
+    .domain(d3.range(24).map(String))
+    .range([0, innerWidth])
+    .paddingInner(0.02)
+    .paddingOuter(0.03)
+    .paddingOuter(0);
+
+  const y = d3.scaleBand().domain(dayOrder).range([0, innerHeight]).paddingInner(0.02).paddingOuter(0);
+
+  const xAxis = d3.axisBottom(x).tickValues(d3.range(1, 24, 2).map(String));
+  const xAxisG = g.append("g").attr("class", "axis").attr("transform", `translate(0,${innerHeight})`).call(xAxis);
+  xAxisG.selectAll("text").attr("text-anchor", "middle").attr("dy", "0.75em");
+  xAxisG.selectAll(".tick text").text((d) => String(Number(d) + 1));
+  xAxisG.selectAll(".tick").attr("transform", function (d) {
+    const xPos = x(String(d));
+    const mid = (xPos != null ? xPos : innerWidth) + x.bandwidth() / 2;
+    return `translate(${mid},0)`;
+  });
+  xAxisG
+    .selectAll("line.mid-tick")
+    .data(d3.range(24))
+    .join("line")
+    .attr("class", "mid-tick")
+    .attr("x1", (d) => x(String(d)) + x.bandwidth() / 2)
+    .attr("x2", (d) => x(String(d)) + x.bandwidth() / 2)
+    .attr("y1", 0)
+    .attr("y2", 6)
+    .attr("stroke", "#666")
+    .attr("stroke-width", 0.6);
+
+  xAxisG
+    .append("text")
+    .attr("fill", "#333")
+    .attr("x", innerWidth / 2)
+    .attr("y", 54)
+    .attr("text-anchor", "middle")
+    .style("font-size", "12px")
+    .text("Hour of day (1–24)");
+
+  g.append("g")
+    .attr("class", "axis")
+    .call(d3.axisLeft(y))
+    .append("text")
+    .attr("fill", "#333")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -innerHeight / 2)
+    .attr("y", -84)
+    .attr("text-anchor", "middle")
+    .style("font-size", "12px")
+    .text("Day of week");
+
+  return { x, y, dayOrder };
+}
+
 const TIME_OPTIONS = d3.range(24).map(hour => ({
   label: formatHourLabel(hour),
   hour
@@ -1054,7 +1144,10 @@ function createBottomRow() {
     };
 }
 
-
+/**
+ * vis4: Hour x weekday heatmap of trip counts from pre-aggregated JSON (e.g. one TLC month).
+ * Color = volume (YlOrRd). Dropdown switches vehicle type; legend doubles as trip scale colorbar.
+ */
 function createVis4(bundle) {
   const TYPE_LABELS = {
     all: "All types",
@@ -1064,11 +1157,8 @@ function createVis4(bundle) {
     fhvhv: "FHVHV (high-volume / app)",
   };
 
-  const margin = { top: 20, right: 232, bottom: 76, left: 128 };
-  const innerWidth = 24 * 34;
-  const innerHeight = 7 * 44;
-  const width = margin.left + innerWidth + margin.right;
-  const height = margin.top + innerHeight + margin.bottom;
+  const { innerWidth, innerHeight, margin, legendBarWidth, legendSegments } = HEATMAP_GRID;
+  const { width, height } = heatmapOuterSize();
 
   const wrap = d3.select("#vis4-chart-wrap");
   wrap.selectAll("*").remove();
@@ -1082,64 +1172,7 @@ function createVis4(bundle) {
 
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const x = d3
-    .scaleBand()
-    .domain(d3.range(24).map(String))
-    .range([0, innerWidth])
-    .paddingInner(0.02)
-    .paddingOuter(0.03)
-    .paddingOuter(0);
-
-  const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-  const y = d3.scaleBand().domain(dayOrder).range([0, innerHeight]).paddingInner(0.02).paddingOuter(0);
-
-  const xAxis = d3.axisBottom(x).tickValues(d3.range(1, 24, 2).map(String));
-  const yAxis = d3.axisLeft(y);
-
-  const xAxisG = g.append("g").attr("class", "axis").attr("transform", `translate(0,${innerHeight})`).call(xAxis);
-  xAxisG.selectAll("text").attr("text-anchor", "middle").attr("dy", "0.75em");
-  // Replace tick labels (which are odd hours: 1,3,...,23) with even labels 2,4,...,24
-  xAxisG.selectAll(".tick text").text((d) => String(Number(d) + 1));
-  // Position tick groups at the center of each hour band so labels sit on the mid-ticks
-  xAxisG.selectAll(".tick").attr("transform", function (d) {
-    const xPos = x(String(d));
-    const mid = (xPos != null ? xPos : innerWidth) + x.bandwidth() / 2;
-    return `translate(${mid},0)`;
-  });
-  // Add a small centered tick for each hour band (hours 1..24 mapped to bands 0..23)
-  const midHours = d3.range(24);
-  xAxisG
-    .selectAll("line.mid-tick")
-    .data(midHours)
-    .join("line")
-    .attr("class", "mid-tick")
-    .attr("x1", (d) => x(String(d)) + x.bandwidth() / 2)
-    .attr("x2", (d) => x(String(d)) + x.bandwidth() / 2)
-    .attr("y1", 0)
-    .attr("y2", 6)
-    .attr("stroke", "#666")
-    .attr("stroke-width", 0.6);
-  // Note: final '24' label is provided by converting the 23 tick to 24 above
-  xAxisG
-    .append("text")
-    .attr("fill", "#333")
-    .attr("x", innerWidth / 2)
-    .attr("y", 54)
-    .attr("text-anchor", "middle")
-    .style("font-size", "12px")
-    .text("Hour of day (1–24)");
-
-  g.append("g")
-    .attr("class", "axis")
-    .call(yAxis)
-    .append("text")
-    .attr("fill", "#333")
-    .attr("transform", "rotate(-90)")
-    .attr("x", -innerHeight / 2)
-    .attr("y", -84)
-    .attr("text-anchor", "middle")
-    .style("font-size", "12px")
-    .text("Day of week");
+  const { x, y, dayOrder } = appendHeatmapHourDayAxes(g, innerWidth, innerHeight);
 
   const legendG = svg
     .append("g")
@@ -1151,7 +1184,7 @@ function createVis4(bundle) {
 
   function showTooltip(html, event) {
     tooltip.style("opacity", 1).html(html);
-    positionTooltip(event);
+    positionHeatmapTooltip(tooltip, event);
   }
 
   function hideTooltip() {
@@ -1160,22 +1193,12 @@ function createVis4(bundle) {
 
   const selectEl = d3.select("#vis4-taxi-type");
 
-  function positionTooltip(event) {
-    const pad = 12;
-    let x0 = event.clientX + pad;
-    let y0 = event.clientY + pad;
-    const node = tooltip.node();
-    const rect = node.getBoundingClientRect();
-    if (x0 + rect.width > window.innerWidth - 8) x0 = event.clientX - rect.width - pad;
-    if (y0 + rect.height > window.innerHeight - 8) y0 = event.clientY - rect.height - pad;
-    tooltip.style("left", x0 + "px").style("top", y0 + "px");
-  }
-
+  /** Vertical sequential colorbar + tick axis for current trip scale. */
   function drawLegend(maxVal, color, typeKey) {
     legendG.selectAll("*").remove();
     const lh = innerHeight;
-    const lw = 18;
-    const n = 48;
+    const lw = legendBarWidth;
+    const n = legendSegments;
     const legendScale = d3.scaleLinear().domain([0, maxVal]).range([lh, 0]);
     const useThousands = maxVal >= 1000;
     const formatLegendValue = (value) => {
@@ -1208,7 +1231,7 @@ function createVis4(bundle) {
           event
         );
       })
-      .on("mousemove", (event) => positionTooltip(event))
+      .on("mousemove", (event) => positionHeatmapTooltip(tooltip, event))
       .on("mouseleave", hideTooltip);
 
     const includeMaxTick = !["green", "fhvhv", "all"].includes(typeKey);
@@ -1236,12 +1259,15 @@ function createVis4(bundle) {
       .text(useThousands ? "Trips (k)" : "Trips");
   }
 
+  /** One rect per (dow, hour); tooltip matches vis5 pattern (weekday, hour band, value line, muted context). */
   function renderCells(cells, color, taxiLabel) {
     const key = (d) => `${d.dow}-${d.hour}`;
     const dayName = (dow) => dayOrder[dow - 1];
     const tipHtml = (d) =>
-      `<strong>${dayName(d.dow)}</strong><br/>Hour <strong>${d.hour}:00</strong>–<strong>${d.hour}:59</strong><br/>` +
-      `<strong>${d3.format(",")(d.count)}</strong> trips<br/><span style="opacity:.85">${taxiLabel}</span>`;
+      `<strong>${dayName(d.dow)}</strong><br/>` +
+      `Hour <strong>${d.hour}:00</strong>–<strong>${d.hour}:59</strong><br/>` +
+      `<strong>${d3.format(",")(d.count)}</strong> trips<br/>` +
+      `<span style="opacity:.85">${taxiLabel}</span>`;
 
     const sel = g.selectAll("rect.cell").data(cells, key);
     sel.exit().remove();
@@ -1260,9 +1286,9 @@ function createVis4(bundle) {
       .on("mouseenter", (event, d) => {
         tooltip.style("opacity", 1);
         tooltip.html(tipHtml(d));
-        positionTooltip(event);
+        positionHeatmapTooltip(tooltip, event);
       })
-      .on("mousemove", (event) => positionTooltip(event))
+      .on("mousemove", (event) => positionHeatmapTooltip(tooltip, event))
       .on("mouseleave", () => tooltip.style("opacity", 0));
 
     const merged = ent.merge(sel);
@@ -1276,9 +1302,9 @@ function createVis4(bundle) {
       .on("mouseenter", (event, d) => {
         tooltip.style("opacity", 1);
         tooltip.html(tipHtml(d));
-        positionTooltip(event);
+        positionHeatmapTooltip(tooltip, event);
       })
-      .on("mousemove", (event) => positionTooltip(event))
+      .on("mousemove", (event) => positionHeatmapTooltip(tooltip, event))
       .on("mouseleave", () => tooltip.style("opacity", 0));
 
     const baseDelay = 24; // ms per hour column
@@ -1326,40 +1352,32 @@ function createVis4(bundle) {
 }
 
 
+/**
+ * vis5: Same grid as vis4, but each cell = (Oct 2025 count − Oct 2015 count) for the selected fleet slice.
+ * Diverging RdBu scale; vertical colorbar matches vis4 legend geometry.
+ */
 function createDifferenceHeatmap(heatmap2015, heatmap2025, selectedType = "all") {
+  const TYPE_LABELS = {
+    all: "All types",
+    green: "Green taxi",
+    yellow: "Yellow taxi",
+    fhv: "FHV (for-hire)",
+    fhvhv: "FHVHV (high-volume / app)",
+  };
+
   const container = d3.select("#vis5");
-
   const tooltip = d3.select("#vis5-tooltip");
-    tooltip.style("opacity", 0);
-    
-  function showTooltip(html) {
-    tooltip
-      .style("opacity", 1)
-      .html(html)
-      .style("left", null)
-      .style("top", null);
+  tooltip.style("opacity", 0);
+
+  function showTip(html, event) {
+    tooltip.style("opacity", 1).html(html);
+    positionHeatmapTooltip(tooltip, event);
   }
 
-  function hideTooltip() {
+  function hideTip() {
     tooltip.style("opacity", 0);
   }
 
-function positionTooltip(event) {
-  const pad = 12;
-  let x = event.pageX + pad;
-  let y = event.pageY + pad;
-
-  const rect = tooltip.node().getBoundingClientRect();
-
-  if (x + rect.width > window.innerWidth) {
-    x = event.pageX - rect.width - pad;
-  }
-  if (y + rect.height > window.innerHeight) {
-    y = event.pageY - rect.height - pad;
-  }
-
-  tooltip.style("left", x + "px").style("top", y + "px");
-}  
   if (container.empty()) {
     console.error("Missing #vis5 container in HTML");
     return;
@@ -1372,122 +1390,146 @@ function positionTooltip(event) {
 
   if (!heatmap2015.types[selectedType] || !heatmap2025.types[selectedType]) {
     console.error("Selected type missing:", selectedType);
-    console.log("2015 types:", Object.keys(heatmap2015.types));
-    console.log("2025 types:", Object.keys(heatmap2025.types));
     return;
   }
 
   const cells2015 = heatmap2015.types[selectedType].cells;
   const cells2025 = heatmap2025.types[selectedType].cells;
-  console.log("2015 total:", d3.sum(cells2015, d => d.count));
-  console.log("2025 total:", d3.sum(cells2025, d => d.count));
   container.selectAll("*").remove();
 
-  const margin = { top: 60, right: 80, bottom: 50, left: 90 };
-  const width = 620 - margin.left - margin.right;
-  const height = 360 - margin.top - margin.bottom;
+  const { innerWidth, innerHeight, margin, legendBarWidth, legendSegments } = HEATMAP_GRID;
+  const { width, height } = heatmapOuterSize();
 
   const svg = container
     .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom);
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("width", "100%")
+    .attr("height", height)
+    .attr("preserveAspectRatio", "xMidYMid meet");
 
-  const g = svg
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const { x, y, dayOrder } = appendHeatmapHourDayAxes(g, innerWidth, innerHeight);
+
+  const legendG = svg
     .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+    .attr("class", "legend-wrap")
+    .attr("transform", `translate(${margin.left + innerWidth + 16}, ${margin.top})`);
 
-  const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-  const hours = d3.range(24);
+  const dayName = (dow) => dayOrder[+dow - 1];
+  const cellKey = (d) => `${d.dow}-${+d.hour}`;
 
-  const dayName = dow => dayOrder[+dow - 1];
+  const map2015 = new Map(cells2015.map((d) => [cellKey(d), +d.count]));
+  const map2025 = new Map(cells2025.map((d) => [cellKey(d), +d.count]));
 
-  const key = d => `${d.dow}-${+d.hour}`;
-
-  const map2015 = new Map(cells2015.map(d => [key(d), +d.count]));
-  const map2025 = new Map(cells2025.map(d => [key(d), +d.count]));
-  
   const diffData = [];
-
-  d3.range(1, 8).forEach(dow => {
-    hours.forEach(hour => {
+  d3.range(1, 8).forEach((dow) => {
+    d3.range(24).forEach((hour) => {
       const k = `${dow}-${hour}`;
       diffData.push({
         dow,
         day: dayName(dow),
         hour,
-        diff: (map2025.get(k) || 0) - (map2015.get(k) || 0)
+        diff: (map2025.get(k) || 0) - (map2015.get(k) || 0),
       });
     });
   });
 
-  const maxAbs = d3.max(diffData, d => Math.abs(d.diff)) || 1;
+  const maxAbs = d3.max(diffData, (d) => Math.abs(d.diff)) || 1;
 
-  const x = d3.scaleBand()
-    .domain(hours.map(String))
-    .range([0, width])
-    .padding(0.03);
-
-  const y = d3.scaleBand()
-    .domain(dayOrder)
-    .range([0, height])
-    .padding(0.03);
-
-  const color = d3.scaleDiverging()
+  const color = d3
+    .scaleDiverging()
     .domain([-maxAbs, 0, maxAbs])
-    .interpolator(t => d3.interpolateRdBu(1 - t));
+    .interpolator((t) => d3.interpolateRdBu(1 - t));
 
-  g.append("text")
-    .attr("x", 0)
-    .attr("y", -32)
-    .attr("font-size", 20)
-    .attr("font-weight", 700)
-    .text("Change in Trip Volume: 2025 vs 2015");
+  /** Vertical diverging strip + ticks (mirrors vis4 sequential legend layout). */
+  function drawDiffLegend() {
+    legendG.selectAll("*").remove();
+    const lh = innerHeight;
+    const lw = legendBarWidth;
+    const n = legendSegments;
+    const legendScale = d3.scaleLinear().domain([-maxAbs, maxAbs]).range([lh, 0]);
+    const useThousands = maxAbs >= 1000;
+    const fmtVal = (v) =>
+      useThousands ? `${d3.format(",.1f")(v / 1000).replace(/\.0$/, "")}k` : d3.format(",.0f")(v);
 
-  g.append("text")
-    .attr("x", 0)
-    .attr("y", -10)
-    .attr("font-size", 12)
-    .attr("fill", "#555")
-    .text("Blue = fewer trips than 2015, red = more trips than 2015");
+    const bars = d3.range(n).map((i) => {
+      const v0 = -maxAbs + (i / n) * (2 * maxAbs);
+      const v1 = -maxAbs + ((i + 1) / n) * (2 * maxAbs);
+      const mid = (v0 + v1) / 2;
+      return { y: legendScale(v1), h: Math.max(1, legendScale(v0) - legendScale(v1)), c: color(mid) };
+    });
 
-  g.selectAll("rect")
+    legendG
+      .selectAll("rect.lg")
+      .data(bars)
+      .join("rect")
+      .attr("class", "lg")
+      .attr("x", 0)
+      .attr("y", (d) => d.y)
+      .attr("width", lw)
+      .attr("height", (d) => d.h)
+      .attr("fill", (d) => d.c)
+      .attr("stroke", "#ccc")
+      .attr("stroke-width", 0.2)
+      .on("mouseenter", (event, d) => {
+        const lo = Math.round(legendScale.invert(d.y + d.h));
+        const hi = Math.round(legendScale.invert(d.y));
+        showTip(`<strong>Δ trips</strong><br/>Range: ${fmtVal(lo)} to ${fmtVal(hi)}`, event);
+      })
+      .on("mousemove", (event) => positionHeatmapTooltip(tooltip, event))
+      .on("mouseleave", hideTip);
+
+    const tickVals = Array.from(new Set([...legendScale.ticks(6), -maxAbs, 0, maxAbs])).sort((a, b) => a - b);
+    legendG
+      .append("g")
+      .attr("transform", `translate(${lw},0)`)
+      .call(d3.axisRight(legendScale).tickValues(tickVals).tickFormat((d) => fmtVal(d)))
+      .selectAll("text")
+      .attr("fill", "#444")
+      .style("font-size", "9px")
+      .attr("dy", "0.35em");
+
+    legendG
+      .append("text")
+      .attr("x", lw / 2)
+      .attr("y", -6)
+      .attr("text-anchor", "middle")
+      .style("font-size", "10px")
+      .style("fill", "#555")
+      .text(useThousands ? "Δ trips (k)" : "Δ trips");
+  }
+
+  drawDiffLegend();
+
+  const typeLabel = TYPE_LABELS[selectedType] || selectedType;
+  const mNew = heatmap2025.monthLabel || "2025";
+  const mOld = heatmap2015.monthLabel || "2015";
+
+  g.selectAll("rect.cell")
     .data(diffData)
     .join("rect")
-    .attr("x", d => x(String(d.hour)))
-    .attr("y", d => y(d.day))
+    .attr("class", "cell")
+    .attr("x", (d) => x(String(d.hour)))
+    .attr("y", (d) => y(d.day))
     .attr("width", x.bandwidth())
     .attr("height", y.bandwidth())
-    .attr("fill", d => color(d.diff))
-    .attr("stroke", "white")
+    .attr("fill", (d) => color(d.diff))
+    .attr("stroke", "#fff")
     .attr("stroke-width", 0.5)
+    .style("cursor", "crosshair")
     .on("mouseenter", (event, d) => {
-      const direction =
-        d.diff > 0 ? "more trips than 2015" :
-        d.diff < 0 ? "fewer trips than 2015" :
-        "no change from 2015";
-
-      showTooltip(
-        `<strong>${d.day}</strong><br/>
-        Hour <strong>${d.hour}:00</strong>–<strong>${d.hour}:59</strong><br/>
-        <strong>${d3.format(",")(Math.abs(d.diff))}</strong> ${direction}`
+      const valueLine = `<strong>${d3.format(",")(d.diff)}</strong> net trips (${mNew} minus ${mOld})`;
+      showTip(
+        `<strong>${d.day}</strong><br/>` +
+          `Hour <strong>${d.hour}:00</strong>–<strong>${d.hour}:59</strong><br/>` +
+          `${valueLine}<br/>` +
+          `<span style="opacity:.85">${typeLabel}</span>`,
+        event
       );
     })
-    .on("mouseleave", hideTooltip);
-
-
-
-
-
-  g.append("g")
-    .attr("transform", `translate(0,${height})`)
-    .call(
-      d3.axisBottom(x)
-        .tickValues([0, 3, 6, 9, 12, 15, 18, 21, 23].map(String))
-        .tickFormat(d => formatHourTickLabel(+d))
-    );
-
-  g.append("g")
-    .call(d3.axisLeft(y));
+    .on("mousemove", (event) => positionHeatmapTooltip(tooltip, event))
+    .on("mouseleave", hideTip);
 }
 
 // Load data

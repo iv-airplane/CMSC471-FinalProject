@@ -203,7 +203,8 @@
     max-width: none;
 }
 
-#vis4 #vis4-title {
+/* Shared heatmap section headings (vis4 + vis5) */
+.heatmap-section-title {
     text-align: center;
     font-weight: 600;
     font-size: 1.25rem;
@@ -211,7 +212,7 @@
     color: #0f172a;
 }
 
-#vis4 .vis4-sub {
+.heatmap-section-sub {
     text-align: center;
     font-size: 0.95rem;
     color: #64748b;
@@ -276,7 +277,45 @@
     cursor: crosshair;
 }
 
-#vis4-tooltip {
+/* vis4 + vis5 heatmaps */
+#vis5-app-wrap {
+    max-width: 900px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#vis5 {
+    max-width: 900px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#vis5 svg {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+}
+
+#vis5 .axis text {
+    fill: #475569;
+    font-size: 11px;
+}
+
+#vis5 .axis path,
+#vis5 .axis line {
+    stroke: #94a3b8;
+}
+
+#vis5 .cell {
+    stroke: #fff;
+    stroke-width: 0.5;
+    cursor: crosshair;
+}
+
+.heatmap-tooltip {
     position: fixed;
     pointer-events: none;
     z-index: 20;
@@ -292,7 +331,7 @@
     max-width: 280px;
 }
 
-#vis4-tooltip strong {
+.heatmap-tooltip strong {
     color: #fff;
 }
 
