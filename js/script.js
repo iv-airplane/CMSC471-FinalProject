@@ -696,19 +696,15 @@ function drawMap() {
     // updateChoropleth();
   }
 
-
-
-// https://vega.github.io/vega-lite/examples/stacked_bar_weather.html
-
 /*
-  Quantitative: Numerical values you can measure and do math with.
-  Nominal: Categories with no inherit order
-  Ordinal: Categories with meaningful order
-*/
-/*
-  Quantitative: Numerical values you can measure and do math with.
-  Nominal: Categories with no inherit order
-  Ordinal: Categories with meaningful order
+  The main function that draws market share visualization.
+
+  Some Vega-lite terminology:
+  * Quantitative: Numerical values you can measure and do math with.
+  * Nominal: Categories with no inherit order
+  * Ordinal: Categories with meaningful order
+
+  A reference to the Vega-lite bar chart documentation: https://vega.github.io/vega-lite/examples/stacked_bar_weather.html
 */
 function createVis3(data) {
     const marketShareChartSpec = {
@@ -716,9 +712,10 @@ function createVis3(data) {
         data: {
             values: data
         },
+        // Vertically concatenate two layers of the market share chart
         vconcat: [
             createTopRow(),
-            createStackedBarChart()
+            createBottomRow()
         ]
     };
 
@@ -727,7 +724,10 @@ function createVis3(data) {
     vegaEmbed('#vis3', marketShareChartSpec, {actions: false});
 }
 
-
+/*
+  A helper function to create the donut chart. Donut chart acts as an enlarged version of a bar user selected.
+  This function is called inside createTopRow function.
+*/
 function createDonutChart() {
     return {
         width: 200,
@@ -798,6 +798,7 @@ function createDonutChart() {
                     text: {
                     aggregate: "sum",
                     field: "trip_count",
+                    // Separate thousands with a comma for convenience
                     format: ","
                     }
                 }
@@ -806,7 +807,9 @@ function createDonutChart() {
     };
 }
 
-// A helper function to create custom legend for the plot
+/* 
+  A helper function to create custom legend. This function is called inside createTopRow function.
+*/
 function createLegendChart() {
     return {
         width: 400,
@@ -830,7 +833,7 @@ function createLegendChart() {
             }
         },
         layer: [
-            // Color squares
+            // Color squares for taxi types
             {
                 mark: {
                     type: "point",
@@ -844,11 +847,11 @@ function createLegendChart() {
                         scale: colorScale,
                         legend: null
                     },
-                    // move color squares further from the border 
+                    // move color squares further from the border, add padding
                     x: { value: 30 }
                 }
             },
-            // Labels for taxis (Uber, Yellow cab...)
+            // Labels for squares: taxis (Uber, Yellow cab...)
             {
                 mark: {
                     type: "text",
@@ -871,10 +874,6 @@ function createLegendChart() {
                 },
                 encoding: {
                     text: {
-                        // field: "share",
-                        // type: "quantitative",
-                        // format: ".0%"
-
                         // Add code to show percentages up to .1% precision
                         field: "share_label",
                         type: "nominal"
@@ -886,6 +885,17 @@ function createLegendChart() {
     };
 }
 
+/*
+  A helper function that draws the top row of visualization 3. This includes:
+
+  * A bar chart showing market share for each taxi type: acts like an enlarged version of the bar. 
+  * A legend showing market share for each taxi type in percentage for the selected year
+  The top row section updates based on the bar the user selected.
+
+  Calls two functions to draw a donut chart and a legend and concatenates them horizontally
+  * createLegendChart
+  * createDonutChart
+*/
 function createTopRow() {
     return {
         // This transform filters the data feeding into the top row 
@@ -893,7 +903,7 @@ function createTopRow() {
         transform: [
             { 
                 // If yearSelection exists, filter by the selected year. 
-                // Otherwise, show only 2020.
+                // Otherwise, show only 2015.
                 filter: "yearSelection.year ? datum.year === yearSelection.year[0] : datum.year === 2015"
             }
         ],
@@ -905,7 +915,15 @@ function createTopRow() {
     };
 }
 
-function createStackedBarChart() {
+/*
+  A helper function that draws the bottom row of visualization 3. This includes:
+
+  * A title
+  * Stacked bars - they have equal height each sums up to 100%
+  * Labels bars of interest
+  * Labels on the x-axis for the years
+*/
+function createBottomRow() {
     return {
         width: 700,
         height: 300,
@@ -924,12 +942,11 @@ function createStackedBarChart() {
                       as: "stack_order"
                     }
                   ],
-
+                // Specify that this is a bar chart
                 mark: {
                     type: "bar",
                     size: 18
                 },
-                
                 /* 
                    Parameters should live ONLY in the 
                    chart of intereset not at the top level
@@ -954,16 +971,19 @@ function createStackedBarChart() {
                             title: "Year",
                             labelAngle: 0
                         },
+                        // add some padding arounf the bars
                         scale: {
                             paddingInner: 0.15,
                             paddingOuter: 0.05
                         }
                     },
+                    // customize y-axis
                     y: {
                         aggregate: "sum",
                         field: "trip_count",
                         type: "quantitative",
                         stack: "normalize",
+                        // remove the ticks
                         axis: null
                     },
                     color: {
@@ -973,7 +993,9 @@ function createStackedBarChart() {
                         legend: null,
                     },
 
-                    // order layers using our custom ""
+                    /* Tell Vega lite to stack taxi types in the "stack_order" to ensure
+                      that HVFHV are drawn at the very bottom of the bar
+                    */
                     order: {
                         field: "stack_order",
                         type: "quantitative",
@@ -986,6 +1008,7 @@ function createStackedBarChart() {
                         condition: { param: "yearSelection", value: 1 },
                         value: 0.4
                     },
+                    // Customize the hover tooltip
                     tooltip: [
                         { field: "year", type: "ordinal" },
                         { field: "taxi_type", type: "nominal" },
@@ -999,7 +1022,7 @@ function createStackedBarChart() {
                     ]
                 }
             },
-            // Labels years with events of interest 
+            // Label years with events of interest and add them to the bars
             {
                 data: {
                     values: [
@@ -1031,7 +1054,7 @@ function createStackedBarChart() {
     };
 }
 
-// Vis 4 code to keep
+
 function createVis4(bundle) {
   const TYPE_LABELS = {
     all: "All types",
@@ -1469,23 +1492,6 @@ function positionTooltip(event) {
 
 // Load data
 function init() {
-    // Ensure the path points to the correct location of your generated CSV
-    // d3.csv("data/market-share/taxi_trip_data_2013_2023.csv", d => ({
-    //     // Use the unary plus (+) operator to convert strings to numbers
-    //     year: +d.year,
-    //     taxi_type: d.taxi_type,
-    //     trip_count: +d.trip_count,
-    //     share: +d.share
-    // })).then(data => {
-    //     // Call your visualization drawing functions with the formatted data
-    //     createVis2(data);
-    //     createVis3(data); // Note: updated from 'allData' to 'data' to use the loaded CSV
-    //     createVis4(data);
-    //
-    //     console.log("Data Loaded Successfully:", data);
-    // }).catch(error => {
-    //     console.error("Error loading the CSV file:", error);
-    // });
   Promise.all([
     d3.json("data/zones/taxi_zones_wgs84.geojson"),
     d3.json("data/choropleth/nyc_boroughs.geojson"),
@@ -1506,10 +1512,9 @@ function init() {
         share: +d.share  })),
     d3.json("data/processed/heatmap_data_2015.json"),  // 2015
     d3.json("data/processed/heatmap_data_2025.json"),  // 2025
-    // d3.json("data/processed/heatmap_data.json")
     d3.json("data/processed/heatmap_data_oct2025_vis4_format.json")
   ]).then(([taxiZonesGeojson, boroughsGeojson, zoneHourly, marketShare, heatmap2015, heatmap2025, heatmapBundle]) => {
-    
+    // Call a separate function for each visualization
     createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson);
     createVis3(marketShare);
     createVis4(heatmapBundle)
