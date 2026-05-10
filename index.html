@@ -211,61 +211,10 @@
 
         </section>
 
-
-
         <section class = "implementation-section">
-            <h2>CONSIDER MOVING TO THE README, GROUP DECISION: Implementation Details</h2>
+            <h2>Summary of findings</h2>
 
-            <h3>Data Processing</h3>
-            <p>
-                The TLC dataset is very large, with millions of trips recorded each month, so we
-                first needed to process and aggregate the data before using it in our visualizations.
-                We used DuckDB to efficiently query the raw trip-level data and generate smaller,
-                analysis-ready datasets.
-            </p>
-
-            <p>
-                From the original data, we created several aggregated datasets:
-            </p>
-            <ul>
-                <li>Trips by taxi zone, hour, and date (for the chloropleth map)</li>
-                <li>Trips by day of week and hour (for the heatmap)</li>
-                <li>Trips by year and vehicle type (for market share trends)</li>
-            </ul>
-
-            <p>
-                One challenge we encountered was that before 2019, high-volume FHV (HVFHV) trips
-                were not tracked separately and were grouped with other FHV trips. As ride-hailing
-                services became more common, the data began separating these categories. To make
-                comparisons consistent over time, we manually split FHV and HVFHV during preprocessing.
-            </p>
-
-            <p>
-                To support the spatial visualization, we used NYC taxi zone shapefiles and converted
-                them into GeoJSON using Mapshaper so they could be rendered in the browser.
-            </p>
-
-            <h3>Visualization</h3>
-            <p>
-                The visualizations are built using D3 and Vega-Lite. We use a taxi zone choropleth map
-                to show how trip activity varies across space, a heatmap to highlight patterns across
-                time, and a stacked bar chart with a donut chart to show changes in market share over time.
-            </p>
-
-            <p>
-                We chose a choropleth map to represent spatial patterns because it allows for easy
-                comparison across zones, and a heatmap to show dense temporal patterns without clutter.
-                The market share visualization uses normalized stacked bars to emphasize proportions
-                rather than absolute values.
-            </p>
-
-            <p>
-                Interactive elements such as sliders, dropdowns, and tooltips allow users to explore
-                different time periods and vehicle types, making it easier to compare patterns and
-                understand how transportation activity changes across the city.
-            </p>
-
-            <h2>CONSIDER ADDING HERE, GROUP DECISION: Summary of findings</h2>
+            <p>TODO</p>
 
         </section>
         
