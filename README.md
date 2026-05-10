@@ -62,4 +62,7 @@ Mixing the two encodings in the same view would be confusing.
 
 # Work Breakdown and Responsibilities
 
-TODO
+### Ivan
+- Developed the market share visualization end-to-end, including implementation, interactions, annotations, and write-up
+- Performed code reviews, merges, and repository coordination
+- Coordinated project logistics, planning, and team meetings
