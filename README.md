@@ -26,7 +26,7 @@ Interactive elements such as sliders, dropdowns, and tooltips allow users to exp
 
 ## Three time scales, three charts
 
-The single hardest call early on was whether to build one ambitious view or several smaller, focused ones. We chose three because the dataset answers three different questions at three different time scales. Stretching a single chart across all of them would force us to either average out the weekly patterns (the choropleth would just show a generic Manhattan blob) or hide the decade-long market shift, which is invisible in any one day.
+The single hardest call early on was whether to build one ambitious view or several smaller, focused ones. We chose three because the dataset answers three different questions at three different time scales, and stretching a single chart across all of them would force us to either average out the weekly patterns — the choropleth would just show a generic Manhattan blob — or hide the decade-long market shift, which is invisible in any one day.
 
 The trade-off is that readers have to jump between views; the upside is each view is honest about what it’s showing.
 
@@ -34,7 +34,7 @@ The trade-off is that readers have to jump between views; the upside is each vie
 
 Yellow (`#f0a500`), green (`#4caf7d`), HVFHV blue (`#3d5a99`), and gray (`#aaaaaa`) for other-FHV are reused identically across all three visualizations.
 
-Yellow and green are the obvious choices. They match the actual cabs. Blue for HVFHV reads as “tech / app” without being a literal Uber or Lyft brand color, which we wanted to avoid because the category includes both.
+Yellow and green are the obvious choices — they match the actual cabs. Blue for HVFHV reads as “tech / app” without being a literal Uber or Lyft brand color, which we wanted to avoid because the category includes both.
 
 Gray is intentionally muted: “other FHV” is a residual category and we don’t want it competing visually with the three categories the reader actually cares about.
 
@@ -50,11 +50,11 @@ In other words: as close to a “typical” modern NYC day as we can pick.
 
 The hour × day heatmap aggregates a whole month so that no single weather event or news day dominates a cell, and so every `(day, hour)` bucket has enough trips to be a stable estimate.
 
-The market-share chart, by contrast, is intentionally coarse, with one row per year per vehicle type. Anything finer would just add noise to a story that is fundamentally about a slow, decade-long structural shift.
+The market-share chart, by contrast, is intentionally coarse — one row per year per vehicle type. Anything finer would just add noise to a story that is fundamentally about a slow, decade-long structural shift.
 
 ## Sequential color for counts, categorical color for types
 
-Inside any one visualization where we are encoding a single quantity (trip counts on the choropleth, trip counts on the heatmap), we use a sequential color ramp from light to dark so brighter cells unambiguously mean more trips.
+Inside any one visualization where we are encoding a single quantity — trip counts on the choropleth, trip counts on the heatmap — we use a sequential color ramp from light to dark so brighter cells unambiguously mean more trips.
 
 The four-color categorical palette only appears where we are comparing vehicle types (the market-share chart and the type selector on the heatmap).
 
@@ -63,9 +63,9 @@ Mixing the two encodings in the same view would be confusing.
 # Work Breakdown and Responsibilities
 
 ### Ivan
-- Developed the market share visualization end-to-end, including implementation, interactions, annotations, and write-up
-- Performed code reviews, merges, and repository coordination
-- Coordinated project logistics, planning, and team meetings
+- Developed the market share visualization end-to-end, including implementation, interactions, annotations, and the write-up.
+- Led repository coordination, including code reviews, pull request management, merges, and integration of visualization components across the project.
+- Coordinated project planning, task organization, team meetings, and overall development workflow throughout the project lifecycle.
 
 ### Dwarakesh Baraneetharan
 - Implemented **vis4** (hour × weekday **heatmap** of TLC trip volumes: D3 scales, sequential color scale and **colorbar** legend, vehicle-type control, tooltips, and integration with preprocessed JSON)
