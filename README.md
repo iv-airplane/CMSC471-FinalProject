@@ -72,3 +72,7 @@ Mixing the two encodings in the same view would be confusing.
 - Aligned **vis5** (2015 vs 2025 **difference heatmap**) with the same grid size, axes, **diverging colorbar**, and **tooltip** behavior
 - **Proofread and edited** the main project **webpage** copy (`index.html`) for narrative flow, accuracy (including time windows for each view), and consistency with the dataset
 - Contributed to **implementation** / **README** documentation as needed
+
+### Aadarsh
+- Updated scale for heatmap visualization, implemented automatic max calculation and tool tips in gradient legend for both heatmap and cholorpleth map.
+- Helped write some of the of the writeup on the webpage
