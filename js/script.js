@@ -149,6 +149,7 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
   const state = {
     ...TIME_OPTIONS[0],
     vehicleType: VIS2_DEFAULT_VEHICLE,
+    // Start in borough view, but allow the user to switch into the more detailed taxi neighborhood view.
     viewMode: "borough"
   };
 
@@ -482,6 +483,7 @@ function showVis2Tooltip(event, f) {
  * @returns {void}
  */
 function drawMap() {
+  // Choose which map geometry to draw based on the selected view.
   const activeGeojson = getActiveGeojson();
 
   // Check if the active GeoJSON data is valid
