@@ -74,8 +74,11 @@ Mixing the two encodings in the same view would be confusing.
 - Contributed to **implementation** / **README** documentation as needed
 
 ### Aadarsh
-- Updated scale for heatmap visualization, implemented automatic max calculation and tool tips in gradient legend for both heatmap and cholorpleth map.
-- Helped write some of the of the writeup on the webpage
+- Developed features for the Heatmap and Choropleth visualizations that would increase user comprehensibility 
+- Helped write the write up for the webpage and shape the narrative for the visulaizations
+- Tested the data preprocessing pipeline for large-scale NYC TLC trip data ensuring the transformation of raw trip records into visualization-ready datasets across multiple vehicle types and time periods were correct, inclusive, and appropriate
+- Contributed to project planning discussions, visualization design decisions, and refinement of user interaction features.
+
 
 ### Ryley
 - Implemented the choropleth visualization, including animation across the day, and established the initial visualization structure using GeoJSON data.
