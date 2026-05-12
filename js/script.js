@@ -137,14 +137,25 @@ const tooltip = d3
   .style("box-shadow", "0 2px 8px rgba(0,0,0,0.12)");
 
 
-
+/**
+ * Creates the choropleth visualization for Visualization 2 and sets up the state for the visualization.
+ * @param {Array} zoneHourly - The hourly data for each taxi zone.
+ * @param {Object} taxiZonesGeojson - The GeoJSON data for the taxi zones.
+ * @param {Object} boroughsGeojson - The GeoJSON data for the boroughs.
+ * @returns {void}
+ */
 function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
+  // Set the initial state for the visualization
   const state = {
     ...TIME_OPTIONS[0],
     vehicleType: VIS2_DEFAULT_VEHICLE,
     viewMode: "borough"
   };
 
+  /**
+   * Gets the active GeoJSON data based on the current view mode.
+   * @returns {Object} The active GeoJSON data.
+   */
   function getActiveGeojson() {
     return state.viewMode === "borough" ? boroughsGeojson : taxiZonesGeojson;
   } 
@@ -166,12 +177,17 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
 
   const vehicleTypes = Array.from(new Set(zoneHourly.map(d => d.vehicle_type))).sort((a, b) =>
     a.localeCompare(b)
-  );
+  ); //Get the unique vehicle types from the zone hourly data
 
   const vehicleOptions = [{ value: "all", label: "All types" }].concat(
     vehicleTypes.map(v => ({ value: v, label: v }))
-  );
+  ); //Get the vehicle options for the vehicle select dropdown
 
+  /**
+   * Gets the label for a vehicle type.
+   * @param {string} vehicleType - The vehicle type.
+   * @returns {string} The label for the vehicle type.
+   */
   function getVehicleLabel(vehicleType) {
     return vehicleOptions.find(v => v.value === vehicleType)?.label ?? vehicleType;
   }
@@ -193,6 +209,11 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
     .attr("fill", "#444")
     .text("");
 
+  /**
+   * Formats the hourly total for the subtitle.
+   * @param {number} total - The total number of trips for the hour.
+   * @returns {string} The formatted hourly total.
+   */
   function formatHourlyTotal(total) {
     return `Total trips this hour: ${d3.format(",")(Math.round(total))}`;
   }
@@ -212,6 +233,11 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
     other_fhv: "#aaaaaa"
   };
 
+  /**
+   * Gets the key for a feature.
+   * @param {Object} f - The feature.
+   * @returns {string} The key for the feature.
+   */
   function getFeatureKey(f) {
     if (state.viewMode === "borough") {
       return getFeatureBorough(f);
@@ -219,6 +245,11 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
     return +f.properties.LocationID;
   }
 
+  /**
+   * Gets the name for a feature.
+   * @param {Object} f - The feature.
+   * @returns {string} The name for the feature.
+   */
   function getFeatureName(f) {
     if (state.viewMode === "borough") {
       return getFeatureBorough(f) || "Unknown borough";
@@ -229,6 +260,13 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
 
  
   const vis2Rows = zoneHourly.filter(d => d.pickup_date === VIS2_DATE);
+
+  /**
+   * Computes the key for a feature.
+   * @param {number} hour - The hour.
+   * @param {string} vehicleType - The vehicle type.
+   * @returns {Object} The key for the feature.
+   */
   function computeByKey(hour, vehicleType) {
     const filtered = vis2Rows.filter(d => +d.pickup_hour === +hour);
 
@@ -249,9 +287,15 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
     );
   }
 
+  /**
+   * Gets the breakdown for a feature.
+   * @param {Object} f - The feature.
+   * @returns {Object} The breakdown for the feature.
+   */
   function getBreakdownForFeature(f) {
     const key = getFeatureKey(f);
 
+    // Filter the rows to only include the rows for the same hour and key
     const rows = vis2Rows.filter(d => {
       const sameHour = +d.pickup_hour === +state.hour;
       const sameKey =
@@ -262,6 +306,7 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
       return sameHour && sameKey;
     });
 
+    // Roll up the rows by vehicle type and sum the trip counts
     const counts = d3.rollup(
       rows,
       rs => d3.sum(rs, r => +r.trip_count),
@@ -270,6 +315,7 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
 
     const total = d3.sum(VEHICLE_ORDER, v => counts.get(v) || 0);
 
+    // Map the vehicle types to the breakdown object
     return VEHICLE_ORDER.map(v => ({
       type: v,
       label: VEHICLE_LABELS[v],
@@ -278,6 +324,11 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
     }));
   }
 
+  /**
+   * Creates the HTML for the breakdown bar.
+   * @param {Object} breakdown - The breakdown object.
+   * @returns {string} The HTML for the breakdown bar.
+   */
   function breakdownBarHtml(breakdown) {
     return `
       <div style="margin-top:8px;">
@@ -311,13 +362,25 @@ function createVis(zoneHourly, taxiZonesGeojson, boroughsGeojson) {
     d => +d.zone_id
   );
 
-function computeByZone(hour, vehicleType) {
+  /**
+   * Computes the key for a feature.
+   * @param {number} hour - The hour.
+   * @param {string} vehicleType - The vehicle type.
+   * @returns {Object} The key for the feature.
+   */
+  function computeByZone(hour, vehicleType) {
   return computeByKey(hour, vehicleType);
 }
 
+  /**
+   * Computes the fixed max value for a vehicle type.
+   * @param {string} vehicleType - The vehicle type.
+   * @returns {number} The fixed max value for the vehicle type.
+   */
   function computeFixedMax(vehicleType) {
     const hours = d3.range(24);
 
+    // Compute the max value for each hour for the vehicle type
     const maxVal = d3.max(hours, hour => {
       const valuesForHour = computeByKey(hour, vehicleType);
       return d3.max([...valuesForHour.values()]) ?? 0;
@@ -326,6 +389,11 @@ function computeByZone(hour, vehicleType) {
     return Math.max(1, maxVal);
   }
 
+  /**
+   * Updates the color scale for a vehicle type.
+   * @param {string} vehicleType - The vehicle type.
+   * @returns {void}
+   */
   function updateColorScale(vehicleType) {
     fixedMaxVal = computeFixedMax(vehicleType);
     currentColorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, fixedMaxVal]);
@@ -347,6 +415,12 @@ let mapPaths;
 let mapLabels;
 let hoveredFeature = null;
 let lastMouseEvent = null;
+
+/**
+ * Gets the borough for a feature.
+ * @param {Object} f - The feature.
+ * @returns {string} The borough for the feature.
+ */
 function getFeatureBorough(f) {
     return (
       f.properties.borough ||
@@ -359,6 +433,11 @@ function getFeatureBorough(f) {
       ""
     );
   }
+
+/**
+ * Resets the info card.
+ * @returns {void}
+ */
 function resetInfoCard() {
   selectedFeature = null;
   selectedKey = null;
@@ -366,6 +445,13 @@ function resetInfoCard() {
   mapOverlay.select(".vis2-info-title").text("Click an area");
   mapOverlay.select(".vis2-info-body").text("Trip details will appear here.");
 }
+
+/**
+ * Shows the tooltip for a feature.
+ * @param {Object} event - The event.
+ * @param {Object} f - The feature.
+ * @returns {void}
+ */
 function showVis2Tooltip(event, f) {
   const key = getFeatureKey(f);
   const name = getFeatureName(f);
@@ -375,6 +461,7 @@ function showVis2Tooltip(event, f) {
 
   mapOverlay.select(".vis2-info-title").html(name);
 
+  // Set the info card body to the HTML for the feature
   mapOverlay.select(".vis2-info-body").html(
     (state.viewMode === "zone"
       ? `<div><b>Zone ID:</b> ${+f.properties.LocationID}</div>`
@@ -389,9 +476,15 @@ function showVis2Tooltip(event, f) {
     breakdownBarHtml(breakdown)
   );
 }
+
+/**
+ * Draws the map.
+ * @returns {void}
+ */
 function drawMap() {
   const activeGeojson = getActiveGeojson();
 
+  // Check if the active GeoJSON data is valid
   if (!activeGeojson || !activeGeojson.features || activeGeojson.features.length === 0) {
     console.error("Missing or invalid GeoJSON for", state.viewMode, activeGeojson);
     return;
@@ -400,6 +493,8 @@ function drawMap() {
   console.log("boroughsGeojson", boroughsGeojson);
   console.log("taxi features", taxiZonesGeojson?.features?.length);
   console.log("borough features", boroughsGeojson?.features?.length);
+
+  // Create the projection for the map
   const projection = d3.geoIdentity()
     .reflectY(true)
     .fitExtent(
@@ -412,9 +507,11 @@ function drawMap() {
 
   const path = d3.geoPath(projection);
 
+  // Remove the existing paths and labels
   mapG.selectAll("path").remove();
   mapG.selectAll("text.borough-label").remove();
 
+  // Create the paths for the map
   mapPaths = mapG
     .selectAll("path")
     .data(activeGeojson.features)
@@ -429,6 +526,7 @@ function drawMap() {
 
       showVis2Tooltip(event, f);
 
+      // Update the stroke, stroke-width, and filter for the selected feature
       mapPaths
         .attr("stroke", d => getFeatureKey(d) === selectedKey ? "#575353ff" : "#484848ff")
         .attr("stroke-width", d => getFeatureKey(d) === selectedKey ? 1.8 : state.viewMode === "borough" ? 1.1 : 0.35)
@@ -494,7 +592,8 @@ function drawMap() {
     .join("stop")
     .attr("offset", d => `${d * 100}%`)
     .attr("stop-color", d => currentColorScale(d * fixedMaxVal));
-
+  
+  // Create the rectangle for the legend
   svg
     .append("rect")
     .attr("x", legendX)
@@ -504,6 +603,7 @@ function drawMap() {
     .attr("fill", `url(#${gradId})`)
     .attr("stroke", "#999");
 
+  // Create the title for the legend
   svg
     .append("text")
     .attr("class", "vis2-legend-title")
@@ -514,11 +614,13 @@ function drawMap() {
     .attr("font-weight", 600)
     .attr("fill", "#333")
     .text("Trip Count");
-
+  
+  // Create the axis for the legend
   const legendAxisG = svg
     .append("g")
     .attr("transform", `translate(${legendX}, ${legendY + legendH})`);
-
+  
+  // Create the tooltip for the legend
   const legendTooltip = d3
     .select("body")
     .selectAll("div.vis2-legend-tooltip")
@@ -535,17 +637,32 @@ function drawMap() {
     .style("font-size", "11px")
     .style("box-shadow", "0 2px 8px rgba(0,0,0,0.12)");
 
+  /**
+   * Formats the adaptive value for the legend.
+   * @param {number} value - The value to format.
+   * @returns {string} The formatted value.
+   */
   function formatAdaptiveValue(value) {
     if (fixedMaxVal >= 1000) {
       return `${d3.format(",.1f")(value / 1000).replace(/\.0$/, "")}k`;
     }
     return d3.format(",.0f")(value);
   }
+  
+  /**
+   * Refreshes the selected info card.
+   * @returns {void}
+   */
   function refreshSelectedInfoCard() {
     if (selectedFeature) {
       showVis2Tooltip(null, selectedFeature);
     }
   }
+  /**
+   * Updates the legend for a vehicle type.
+   * @param {string} vehicleType - The vehicle type.
+   * @returns {void}
+   */
   function updateLegend(vehicleType) {
     const includeMaxTick = vehicleType !== "all";
 
@@ -569,7 +686,7 @@ function drawMap() {
           .tickFormat(d => formatAdaptiveValue(d))
       )
       .call(g => g.select(".domain").remove());
-
+    
     legendAxisG
       .append("rect")
       .attr("x", 0)
@@ -581,6 +698,7 @@ function drawMap() {
         const pos = d3.pointer(event, this)[0];
         const hoverVal = legendScale.invert(pos);
 
+        // Update the tooltip for the legend
         legendTooltip
           .style("opacity", 1)
           .style("left", `${event.pageX + 8}px`)
@@ -590,12 +708,18 @@ function drawMap() {
       .on("mouseleave", () => legendTooltip.style("opacity", 0));
   }
 
+  /**
+   * Updates the choropleth.
+   * @returns {void}
+   */
   function updateChoropleth() {
     byZone = computeByZone(state.hour, state.vehicleType);
 
+    // Compute the hourly total
     const hourlyTotal = d3.sum([...byZone.values()]);
     subtitle.text(formatHourlyTotal(hourlyTotal));
 
+    // Update the choropleth
     mapPaths
       .interrupt()
       .transition()
@@ -607,14 +731,19 @@ function drawMap() {
         return Number.isFinite(v) ? currentColorScale(v) : "#f2f2f2";
       });
 
+    // Update the legend
     updateLegend(state.vehicleType);
+
+    // If a feature is hovered, show the tooltip
     if (hoveredFeature && lastMouseEvent) {
       showVis2Tooltip(lastMouseEvent, hoveredFeature);
     }
   }
 
+  // Create the controls for the visualization
   const controls = root.append("div").attr("class", "vis2-controls");
   
+  // Create the HTML for the controls
   controls.html(`
 
 
@@ -635,10 +764,12 @@ function drawMap() {
     </div>
   `);
   
+  // Create the map overlay
   const mapOverlay = root
     .append("div")
     .attr("class", "vis2-map-overlay");
-
+  
+  // Create the HTML for the map overlay
   mapOverlay.html(`
     <div class="vis2-overlay-card">
       <span class="vis2-field-label">Map view</span>
@@ -661,8 +792,10 @@ function drawMap() {
     
   `);
 
+  // Create the slider tick hours
   const sliderTickHours = TIME_OPTIONS.filter(d => d.hour % 3 === 0 || d.hour === 23);
 
+  // Create the slider tick hours labels
   controls
     .select(".vis2-time-labels")
     .selectAll("span")
@@ -671,6 +804,7 @@ function drawMap() {
     .text(d => formatHourTickLabel(d.hour));
   
   
+  // Create the vehicle select dropdown
   controls
     .select(".vis2-vehicle-select")
     .selectAll("option")
@@ -681,24 +815,36 @@ function drawMap() {
 
   controls.select(".vis2-vehicle-select").property("value", state.vehicleType);
 
+  // Create the play toggle button
   const playToggle = controls.select(".vis2-play-toggle");
   const VIS2_PLAY_MS = 800;
 
+  /**
+   * Syncs the hour from the index.
+   * @param {number} idx - The index of the hour.
+   * @returns {void}
+   */
   function syncHourFromIndex(idx) {
     const i = Math.min(TIME_OPTIONS.length - 1, Math.max(0, +idx));
 
+    // Set the value of the time slider to the index
     controls.select(".vis2-time-slider").property("value", i);
     Object.assign(state, TIME_OPTIONS[i]);
     controls.select(".vis2-time-value").text(state.label);
 
+    // Update the title
     title.text(
     `NYC Pickups by ${state.viewMode === "borough" ? "Borough" : "Taxi Zone"} — ${getVehicleLabel(state.vehicleType)}, ${state.label}`
   );
-
+    // Update the choropleth
     updateChoropleth();
     refreshSelectedInfoCard();
   }
 
+  /**
+   * Stops the play day.
+   * @returns {void}
+   */
   function stopPlayDay() {
     if (visRootNode.__vis2PlayDayTimer) {
       clearInterval(visRootNode.__vis2PlayDayTimer);
@@ -708,12 +854,13 @@ function drawMap() {
     playToggle.text("Play day");
   }
 
+  // Create the play toggle button event listener
   playToggle.on("click", () => {
     if (visRootNode.__vis2PlayDayTimer) {
       stopPlayDay();
       return;
     }
-
+    // Set the interval for the play day
     visRootNode.__vis2PlayDayTimer = setInterval(() => {
       const nextIdx = (state.hour + 1) % TIME_OPTIONS.length;
       syncHourFromIndex(nextIdx);
@@ -721,7 +868,7 @@ function drawMap() {
 
     playToggle.text("Pause");
   });
-
+  
   controls.select(".vis2-time-slider").on("input", e => {
     stopPlayDay();
     // stopStory()
@@ -729,39 +876,41 @@ function drawMap() {
   });
   
   
-
+  // Create the map overlay toggle button event listener
   mapOverlay.selectAll(".vis2-toggle-btn").on("click", function () {
     stopPlayDay();
     // stopStory();
 
     state.viewMode = this.dataset.view;
 
+    // Update the active class for the map overlay toggle button
     mapOverlay
       .selectAll(".vis2-toggle-btn")
       .classed("active", function () {
         return this.dataset.view === state.viewMode;
       });
-
+    
     title.text(
       `NYC Pickups by ${
         state.viewMode === "borough" ? "Borough" : "Taxi Zone"
       } — ${getVehicleLabel(state.vehicleType)}, ${state.label}`
     );
-
+    
     updateColorScale(state.vehicleType);
     svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity);
     resetInfoCard();
     drawMap();
     updateChoropleth();
   });
+  // Create the zoom in button event listener
   mapOverlay.select(".vis2-zoom-in").on("click", () => {
     svg.transition().duration(250).call(zoom.scaleBy, 1.4);
   });
-
+  // Create the zoom out button event listener
   mapOverlay.select(".vis2-zoom-out").on("click", () => {
     svg.transition().duration(250).call(zoom.scaleBy, 1 / 1.4);
   });
-
+  // Create the zoom reset button event listener
   mapOverlay.select(".vis2-zoom-reset").on("click", () => {
     svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity);
   });
@@ -770,6 +919,7 @@ function drawMap() {
     // stopStory();
     state.vehicleType = e.target.value;
 
+    // Update the title
     title.text(
       `NYC Pickups by ${state.viewMode === "borough" ? "Borough" : "Taxi Zone"} — ${getVehicleLabel(state.vehicleType)}, ${state.label}`
     );  

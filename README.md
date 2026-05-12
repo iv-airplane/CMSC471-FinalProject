@@ -76,3 +76,9 @@ Mixing the two encodings in the same view would be confusing.
 ### Aadarsh
 - Updated scale for heatmap visualization, implemented automatic max calculation and tool tips in gradient legend for both heatmap and cholorpleth map.
 - Helped write some of the of the writeup on the webpage
+
+### Ryley
+- Implemented the choropleth visualization, including animation across the day, and established the initial visualization structure using GeoJSON data.
+- Improved visualization integration and consistency across the webpage layout 
+- Aided write-up refinement and documentation
+- Contributed to project planning discussions, visualization design decisions, and refinement of user interaction features.
