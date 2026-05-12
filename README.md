@@ -82,3 +82,10 @@ Mixing the two encodings in the same view would be confusing.
 - Improved visualization integration and consistency across the webpage layout 
 - Aided write-up refinement and documentation
 - Contributed to project planning discussions, visualization design decisions, and refinement of user interaction features.
+
+### Emily Cheng
+- Built the data preprocessing pipeline for large-scale NYC TLC trip data using Python and DuckDB, including cleaning, aggregating, and transforming raw trip records into visualization-ready datasets across multiple vehicle types and time periods
+- Implemented the taxi neighborhood-level choropleth view to enable more detailed exploration of NYC trip demand patterns
+- Added interactive map features including borough/neighborhood toggles and zoom functionality
+- Laid the foundation for the project’s webpage design and analytical narrative, helping shape the overall storytelling approach, dashboard structure, and user experience
+

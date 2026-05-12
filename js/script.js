@@ -8,7 +8,7 @@ const colorScale = {
 const margin = { top: 54, right: 18, bottom: 18, left: 18 };
 const width = 1000;
 const height = 650;
-const VIS2_DATE = "2024-10-16";
+const VIS2_DATE = "2025-10-16";
 const VIS2_DEFAULT_VEHICLE = "all";
 function formatHourLabel(hour) {
   const h12 = hour % 12 === 0 ? 12 : hour % 12;
