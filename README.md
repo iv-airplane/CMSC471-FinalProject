@@ -74,10 +74,10 @@ Mixing the two encodings in the same view would be confusing.
 - Contributed to **implementation** / **README** documentation as needed
 
 ### Aadarsh
-- Conducted the initial EDA for this assignment in order to determine the narrative and coded up sample visualizations for the heatmap and bar chart that were used in the final webpage.
-- Developed features for the Heatmap and Choropleth visualizations that would increase user comprehensibility 
-- Helped write the write up for the webpage and shape the narrative for the visulaizations
-- Contributed to project planning discussions, visualization design decisions, and refinement of user interaction features.
+- Led the initial exploratory data analysis to identify key trends and shape the project's narrative direction, then prototyped sample heatmap and bar chart visualizations that were adopted in the final webpage.
+- Engineered interactive features for the heatmap and choropleth visualizations to improve readability and help users interpret the data more intuitively.
+- Co-authored the webpage write-up and helped craft a cohesive narrative that tied each visualization back to the project's central story.
+- Contributed to project planning, visualization design decisions, and iterative refinement of user interaction features throughout the development cycle.
 
 
 ### Ryley
