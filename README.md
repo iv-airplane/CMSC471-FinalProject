@@ -74,9 +74,9 @@ Mixing the two encodings in the same view would be confusing.
 - Contributed to **implementation** / **README** documentation as needed
 
 ### Aadarsh
+- Conducted EDA in order to determine the narrative and coded up sample visualizations for the heatmap and bar chart that were used in the final webpage.
 - Developed features for the Heatmap and Choropleth visualizations that would increase user comprehensibility 
 - Helped write the write up for the webpage and shape the narrative for the visulaizations
-- Tested the data preprocessing pipeline for large-scale NYC TLC trip data ensuring the transformation of raw trip records into visualization-ready datasets across multiple vehicle types and time periods were correct, inclusive, and appropriate
 - Contributed to project planning discussions, visualization design decisions, and refinement of user interaction features.
 
 
